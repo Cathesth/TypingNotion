@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypingNotion</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net/npm/pretendard@latest" crossorigin>
+  <link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/npm/pretendard@latest/dist/web/static/pretendard.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['Pretendard', 'ui-monospace', 'SFMono-Regular', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* ── Text display ──────────────────────────────────────────────────── */
+    * {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+
+    #text-display {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-size: 1.2rem;
+      line-height: 2.6;
+      word-break: break-word;
+      white-space: pre-wrap;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .ch {
+      display: inline;
+    }
+
+    /* untyped */
+    .ch-untyped {
+      color: #d1d5db;
+    }
+
+    .dark .ch-untyped {
+      color: #3f3f46;
+    }
+
+    /* correct */
+    .ch-correct {
+      color: #18181b;
+    }
+
+    .dark .ch-correct {
+      color: #fafafa;
+    }
+
+    /* wrong */
+    .ch-incorrect {
+      color: #ef4444;
+      background: rgba(239, 68, 68, .08);
+      border-radius: 2px;
+    }
+
+    .dark .ch-incorrect {
+      color: #f87171;
+      background: rgba(248, 113, 113, .1);
+    }
+
+    /* cursor (next char to type) */
+    .ch-cursor {
+      color: #71717a;
+      /* 인디고 아웃라인으로 위치를 표시하되, 텍스트는 회색 (입력 전처럼 보임) */
+      background: rgba(99, 102, 241, .1);
+      border-radius: 2px;
+      outline: 2px solid rgba(99, 102, 241, .65);
+      outline-offset: -1px;
+      animation: blink-outline 1s ease-in-out infinite;
+    }
+
+    .dark .ch-cursor {
+      color: #a1a1aa;
+      /* dark 모드에서도 회색 - correct(흔색)과 명확히 구분됨 */
+      background: rgba(129, 140, 248, .12);
+      outline-color: rgba(129, 140, 248, .72);
+    }
+
+    @keyframes blink-outline {
+
+      0%,
+      100% {
+        outline-color: rgba(99, 102, 241, .5);
+      }
+
+      50% {
+        outline-color: rgba(99, 102, 241, .15);
+      }
+    }
+
+    .dark .ch-cursor {
+      animation: blink-outline-dark 1s ease-in-out infinite;
+    }
+
+    @keyframes blink-outline-dark {
+
+      0%,
+      100% {
+        outline-color: rgba(129, 140, 248, .55);
+      }
+
+      50% {
+        outline-color: rgba(129, 140, 248, .15);
+      }
+    }
+
+    /* ── IME composing ─────────────────────────────────────────────────── */
+    /* shown while the user is building a Korean syllable */
+    .ch-composing {
+      color: #2563eb;
+      border-bottom: 2px solid #3b82f6;
+      animation: none;
+      outline: none;
+    }
+
+    .dark .ch-composing {
+      color: #93c5fd;
+      border-bottom-color: #60a5fa;
+    }
+
+    /* ── Newline indicator ─────────────────────────────────────────────── */
+    .ch-nl {
+      font-size: .68em;
+      opacity: .28;
+      vertical-align: baseline;
+    }
+
+    .ch-nl.ch-cursor {
+      opacity: .6;
+    }
+
+    .ch-nl.ch-correct {
+      opacity: .1;
+    }
+
+    .ch-nl.ch-composing {
+      opacity: .7;
+    }
+
+    /* ── Skip indicator (greyed correct) ──────────────────────────────── */
+    .ch-skipped {
+      color: #a3a3a3;
+    }
+
+    .dark .ch-skipped {
+      color: #52525b;
+    }
+
+    /* ── Header / progress bar ─────────────────────────────────────────── */
+    #typing-header {
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    #prog-bar-fill {
+      transition: width .1s linear;
+    }
+
+    /* ── Settings panel ────────────────────────────────────────────────── */
+    #settings-panel {
+      position: fixed;
+      top: 50px;
+      right: 12px;
+      z-index: 50;
+      min-width: 200px;
+    }
+
+    /* ── Spinner ───────────────────────────────────────────────────────── */
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spin {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #d4d4d8;
+      border-top-color: #71717a;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      vertical-align: -2px;
+      margin-right: 5px;
+    }
+
+    .dark .spin {
+      border-color: #3f3f46;
+      border-top-color: #a1a1aa;
+    }
+
+    /* ── Tab active ────────────────────────────────────────────────────── */
+    .tab-btn {
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+
+    .tab-btn[data-active="true"] {
+      border-bottom-color: #6366f1;
+      color: #4f46e5;
+    }
+
+    .dark .tab-btn[data-active="true"] {
+      color: #818cf8;
+      border-bottom-color: #818cf8;
+    }
+  </style>
+</head>
+
+<body class="bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100 transition-colors duration-150">
+
+  <!-- ══════════════════════════════════════════════
+     SCREEN 1 — INPUT
+══════════════════════════════════════════════ -->
+  <div id="s-input" class="min-h-screen flex flex-col items-center justify-center px-6 py-16">
+    <div class="w-full max-w-xl">
+
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion</h1>
+          <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
+            If you find this useful, please
+            <a href="https://github.com/Cathesth/TypingNotion" target="_blank" rel="noopener"
+              class="underline underline-offset-2 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">⭐ star
+              on GitHub</a>
+          </p>
+        </div>
+        <div class="flex items-center gap-1">
+          <a href="https://github.com/Cathesth/TypingNotion" target="_blank" rel="noopener" title="GitHub" class="w-8 h-8 flex items-center justify-center rounded-md
+                  text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200
+                  hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+              0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+              -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+              .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+              -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+              .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+              .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+              0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+            </svg>
+          </a>
+          <button onclick="toggleTheme()" class="w-8 h-8 flex items-center justify-center rounded-md
+                 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200
+                 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" title="테마 전환"><span
+              class="theme-icon">🌙</span></button>
+        </div>
+      </div>
+      <div class="mb-5"></div>
+
+      <!-- Tabs -->
+      <div class="flex gap-1 border-b border-zinc-200 dark:border-zinc-700 mb-5">
+        <button id="tab-url" data-active="true" onclick="switchTab('url')" class="tab-btn px-4 py-2 font-mono text-sm font-medium -mb-px
+               text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200">
+          노션 URL
+        </button>
+        <button id="tab-text" data-active="false" onclick="switchTab('text')" class="tab-btn px-4 py-2 font-mono text-sm font-medium -mb-px
+               text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200">
+          직접 입력
+        </button>
+      </div>
+
+      <!-- URL Panel -->
+      <div id="panel-url">
+        <div class="flex gap-2">
+          <input id="url-inp" type="url" placeholder="https://your-name.notion.site/..."
+            onkeydown="if(event.key==='Enter') onFetch()" class="flex-1 px-3 py-2 font-mono text-sm
+                 bg-zinc-50 dark:bg-zinc-900
+                 border border-zinc-200 dark:border-zinc-700 rounded-lg
+                 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500
+                 placeholder:text-zinc-300 dark:placeholder:text-zinc-600
+                 text-zinc-800 dark:text-zinc-200 transition-colors" />
+          <button id="fetch-btn" onclick="onFetch()" class="px-4 py-2 font-mono text-sm font-medium rounded-lg transition-colors
+                 bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900
+                 hover:bg-zinc-600 dark:hover:bg-zinc-300
+                 disabled:opacity-40 disabled:cursor-not-allowed">
+            불러오기
+          </button>
+        </div>
+        <p id="fetch-status" class="mt-2.5 font-mono text-xs min-h-[16px]"></p>
+        <div id="preview-wrap" style="display:none" class="mt-4">
+          <p class="font-mono text-xs text-zinc-400 dark:text-zinc-500 mb-1.5">추출된 텍스트 — 수정 후 시작하세요</p>
+          <div id="notion-title-wrap" style="display:none" class="mb-3 px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
+            <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">페이지 제목</span>
+            <p id="notion-title-text" class="font-mono text-sm text-zinc-800 dark:text-zinc-200 font-medium mt-0.5"></p>
+          </div>
+          <textarea id="preview-ta" rows="9" spellcheck="false" class="w-full p-3 font-mono text-sm leading-relaxed
+                 bg-zinc-50 dark:bg-zinc-900
+                 border border-zinc-200 dark:border-zinc-700 rounded-xl resize-none
+                 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500
+                 text-zinc-800 dark:text-zinc-200 transition-colors"></textarea>
+          <div class="flex justify-end mt-3">
+            <button onclick="onStartFromPreview()" class="px-5 py-2 font-mono text-sm font-medium rounded-lg
+                   bg-indigo-500 hover:bg-indigo-600 text-white transition-colors">
+              시작하기 →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text Panel -->
+      <div id="panel-text" style="display:none">
+        <textarea id="source-ta" rows="10" placeholder="타이핑할 텍스트를 붙여넣으세요" spellcheck="false" autocomplete="off" class="w-full p-4 font-mono text-sm leading-relaxed
+               bg-zinc-50 dark:bg-zinc-900
+               border border-zinc-200 dark:border-zinc-700 rounded-xl resize-none
+               focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500
+               placeholder:text-zinc-300 dark:placeholder:text-zinc-600
+               text-zinc-800 dark:text-zinc-200 transition-colors"></textarea>
+        <div class="flex items-center justify-between mt-3">
+          <p class="font-mono text-xs text-zinc-300 dark:text-zinc-600">Ctrl+Enter로도 시작</p>
+          <button id="start-btn-text" disabled onclick="onStartFromText()" class="px-5 py-2 font-mono text-sm font-medium rounded-lg transition-colors
+                 bg-indigo-500 text-white hover:bg-indigo-600
+                 disabled:bg-zinc-100 dark:disabled:bg-zinc-800
+                 disabled:text-zinc-300 dark:disabled:text-zinc-600
+                 disabled:cursor-not-allowed">
+            시작하기 →
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+     SCREEN 2 — TYPING
+══════════════════════════════════════════════ -->
+  <div id="s-typing" style="display:none" class="min-h-screen">
+
+    <!-- Fixed header -->
+    <header id="typing-header" class="fixed top-0 left-0 right-0 z-20
+           bg-white/90 dark:bg-zinc-950/90
+           border-b border-zinc-100 dark:border-zinc-800">
+      <div class="h-[2px] bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+        <div id="prog-bar-fill" class="h-full bg-indigo-400 dark:bg-indigo-500" style="width:0%"></div>
+      </div>
+      <div class="max-w-3xl mx-auto px-5 h-11 flex items-center gap-4">
+
+        <button onclick="onBack()" class="font-mono text-xs text-zinc-400 hover:text-zinc-700
+               dark:hover:text-zinc-300 transition-colors whitespace-nowrap">
+          ← 처음으로
+        </button>
+        <span class="font-mono text-[10px] text-zinc-300 dark:text-zinc-600 mr-auto whitespace-nowrap">Ctrl+R 재시작</span>
+
+        <div class="flex items-center gap-1.5">
+          <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">진행</span>
+          <span id="st-prog"
+            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-11 text-right tabular-nums">0%</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">정확도</span>
+          <span id="st-acc"
+            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-11 text-right tabular-nums">—</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">오타</span>
+          <span id="st-err"
+            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-6 text-right tabular-nums">0</span>
+        </div>
+
+        <!-- Settings toggle -->
+        <button onclick="toggleSettings(event)" class="w-7 h-7 flex items-center justify-center rounded
+               text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" title="스킵 설정">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+            <path d="M12 2v2m0 16v2M2 12h2m16 0h2" />
+          </svg>
+        </button>
+
+        <button onclick="toggleTheme()" class="w-7 h-7 flex items-center justify-center rounded
+               text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" title="테마 전환"><span
+            class="theme-icon">🌙</span></button>
+      </div>
+    </header>
+
+    <!-- Settings popover -->
+    <div id="settings-panel" style="display:none" class="bg-white dark:bg-zinc-900
+           border border-zinc-200 dark:border-zinc-700
+           rounded-xl shadow-lg p-4">
+      <p class="font-mono text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3">
+        스페이스바 스킵
+      </p>
+      <label class="flex items-center gap-2.5 mb-2 cursor-pointer group">
+        <input type="checkbox" id="skip-symbols" onchange="onSettingChange()"
+          class="w-4 h-4 rounded accent-indigo-500 cursor-pointer">
+        <span
+          class="font-mono text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
+          기호 스킵 <span class="text-zinc-400 dark:text-zinc-500 text-xs">(!., …)</span>
+        </span>
+      </label>
+      <label class="flex items-center gap-2.5 mb-2 cursor-pointer group">
+        <input type="checkbox" id="only-english" onchange="onSettingChange('onlyEnglish')"
+          class="w-4 h-4 rounded accent-indigo-500 cursor-pointer">
+        <span
+          class="font-mono text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
+          영어만 타이핑 <span class="text-zinc-400 dark:text-zinc-500 text-xs">(한글·기호 자동 스킵)</span>
+        </span>
+      </label>
+      <label class="flex items-center gap-2.5 cursor-pointer group">
+        <input type="checkbox" id="only-korean" onchange="onSettingChange('onlyKorean')"
+          class="w-4 h-4 rounded accent-indigo-500 cursor-pointer">
+        <span
+          class="font-mono text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
+          한글만 타이핑 <span class="text-zinc-400 dark:text-zinc-500 text-xs">(영어·기호 자동 스킵)</span>
+        </span>
+      </label>
+    </div>
+
+    <!-- Text display -->
+    <main class="pt-24 pb-[55vh]">
+      <div class="max-w-[700px] mx-auto px-8">
+        <div id="text-display"></div>
+      </div>
+    </main>
+
+    <!-- Hidden IME input -->
+    <input id="hidden-inp" type="text" tabindex="-1" autocomplete="off" autocorrect="off" autocapitalize="off"
+      spellcheck="false" style="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;border:none;
+           outline:none;padding:0;pointer-events:none;background:transparent;" />
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+     SCREEN 3 — RESULTS
+══════════════════════════════════════════════ -->
+  <div id="s-results" style="display:none" class="min-h-screen flex flex-col items-center justify-center px-6 py-16">
+    <div class="w-full max-w-sm">
+      <h2 class="font-mono text-2xl font-bold text-zinc-800 dark:text-zinc-200 mb-9">완료</h2>
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
+          <p class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">시간</p>
+          <p id="r-time" class="font-mono text-xl font-bold text-zinc-800 dark:text-zinc-200"></p>
+        </div>
+        <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
+          <p class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">WPM</p>
+          <p id="r-wpm" class="font-mono text-xl font-bold text-zinc-800 dark:text-zinc-200"></p>
+        </div>
+        <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
+          <p class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">정확도</p>
+          <p id="r-acc" class="font-mono text-xl font-bold text-zinc-800 dark:text-zinc-200"></p>
+        </div>
+        <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
+          <p class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">오타 수</p>
+          <p id="r-errs" class="font-mono text-xl font-bold text-red-500"></p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="onRetry()" class="flex-1 py-2.5 font-mono text-sm font-medium rounded-lg
+               bg-indigo-500 hover:bg-indigo-600 text-white transition-colors">
+          다시하기
+        </button>
+        <button onclick="onNewText()" class="flex-1 py-2.5 font-mono text-sm font-medium rounded-lg
+               bg-zinc-100 dark:bg-zinc-800
+               hover:bg-zinc-200 dark:hover:bg-zinc-700
+               text-zinc-700 dark:text-zinc-300 transition-colors">
+          새 텍스트
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════════ -->
+  <script>
+    'use strict';
+
+    // ─── Theme ────────────────────────────────────────────────────────────────────
+    (function () {
+      const s = localStorage.getItem('typing-theme');
+      if (s === 'dark' || (!s && matchMedia('(prefers-color-scheme:dark)').matches))
+        document.documentElement.classList.add('dark');
+      syncIcons();
+    })();
+    function toggleTheme() {
+      const d = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('typing-theme', d ? 'dark' : 'light');
+      syncIcons();
+    }
+    function syncIcons() {
+      const d = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.theme-icon').forEach(el => { el.textContent = d ? '☀️' : '🌙'; });
+    }
+
+    // ─── Settings ─────────────────────────────────────────────────────────────────
+    const settings = { skipSymbols: true, onlyEnglish: false, onlyKorean: false };
+
+    (function loadSettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('typing-settings') || '{}');
+        // 구 버전 호환: skipEnglish/skipKorean → onlyEnglish/onlyKorean 마이그레이션
+        if (saved.skipEnglish !== undefined) { saved.onlyEnglish = saved.skipEnglish; delete saved.skipEnglish; }
+        if (saved.skipKorean !== undefined) { saved.onlyKorean = saved.skipKorean; delete saved.skipKorean; }
+        Object.assign(settings, saved);
+      } catch (_) { }
+      document.getElementById('skip-symbols').checked = settings.skipSymbols;
+      document.getElementById('only-english').checked = settings.onlyEnglish;
+      document.getElementById('only-korean').checked = settings.onlyKorean;
+    })();
+
+    function onSettingChange(changed) {
+      settings.skipSymbols = document.getElementById('skip-symbols').checked;
+      settings.onlyEnglish = document.getElementById('only-english').checked;
+      settings.onlyKorean = document.getElementById('only-korean').checked;
+      // 상호 배타: 영어만/한글만은 동시에 켤 수 없음
+      if (changed === 'onlyEnglish' && settings.onlyEnglish) {
+        settings.onlyKorean = false;
+        document.getElementById('only-korean').checked = false;
+      } else if (changed === 'onlyKorean' && settings.onlyKorean) {
+        settings.onlyEnglish = false;
+        document.getElementById('only-english').checked = false;
+      }
+      localStorage.setItem('typing-settings', JSON.stringify(settings));
+    }
+
+    let settingsOpen = false;
+    function toggleSettings(e) {
+      e.stopPropagation();
+      settingsOpen = !settingsOpen;
+      document.getElementById('settings-panel').style.display = settingsOpen ? '' : 'none';
+    }
+    document.addEventListener('click', () => {
+      if (settingsOpen) { settingsOpen = false; document.getElementById('settings-panel').style.display = 'none'; }
+    });
+    document.getElementById('settings-panel').addEventListener('click', e => e.stopPropagation());
+
+    // ─── Skip helpers ─────────────────────────────────────────────────────────────
+    function isSymbol(ch) { return ch !== ' ' && ch !== '\n' && !/[\p{L}\p{N}]/u.test(ch); }
+    function isEnglish(ch) { return /[a-zA-Z]/.test(ch); }
+    function isKorean(ch) { return /[\u3130-\u318F\uAC00-\uD7A3]/.test(ch); }
+
+    function isSkippable(ch) {
+      if (ch === ' ' || ch === '\n') return false;
+      // 영어만 타이핑: 영어 제외 모든 문자(한글, 기호 등) 스킵
+      if (settings.onlyEnglish) return !isEnglish(ch);
+      // 한글만 타이핑: 한글 제외 모든 문자(영어, 기호 등) 스킵
+      if (settings.onlyKorean) return !isKorean(ch);
+      // 기본: 기호 스킵만
+      if (settings.skipSymbols && isSymbol(ch)) return true;
+      return false;
+    }
+
+    // ─── Screen switching ─────────────────────────────────────────────────────────
+    const DISP = { 's-input': 'flex', 's-typing': 'block', 's-results': 'flex' };
+    function showScreen(id) {
+      Object.keys(DISP).forEach(k => {
+        document.getElementById(k).style.display = k === id ? DISP[k] : 'none';
+      });
+    }
+
+    // ─── Tab switching ────────────────────────────────────────────────────────────
+    function switchTab(tab) {
+      const isUrl = tab === 'url';
+      document.getElementById('panel-url').style.display = isUrl ? '' : 'none';
+      document.getElementById('panel-text').style.display = isUrl ? 'none' : '';
+      document.getElementById('tab-url').dataset.active = String(isUrl);
+      document.getElementById('tab-text').dataset.active = String(!isUrl);
+    }
+
+    // ─── Direct text input ────────────────────────────────────────────────────────
+    const sourceTA = document.getElementById('source-ta');
+    const startBtnTx = document.getElementById('start-btn-text');
+    sourceTA.addEventListener('input', () => { startBtnTx.disabled = !sourceTA.value.trim(); });
+    sourceTA.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (!startBtnTx.disabled) onStartFromText(); }
+    });
+    function onStartFromText() { const t = sourceTA.value.trim(); if (t) startGame(t); }
+
+    // ─── URL Fetch ────────────────────────────────────────────────────────────────
+    let fetchAbort = null;
+
+    async function onFetch() {
+      const url = document.getElementById('url-inp').value.trim();
+      if (!url) return;
+      if (fetchAbort) fetchAbort.abort();
+      fetchAbort = new AbortController();
+
+      const btn = document.getElementById('fetch-btn');
+      btn.disabled = true;
+      setFetchStatus('loading', '페이지를 불러오는 중…');
+      document.getElementById('preview-wrap').style.display = 'none';
+      document.getElementById('notion-title-wrap').style.display = 'none';
+
+      try {
+        setFetchStatus('loading', 'Jina Reader로 페이지 변환 중…');
+        const text = await fetchViaJinaReader(url, fetchAbort.signal);
+
+        if (!text || !text.trim()) {
+          throw new Error('텍스트를 추출할 수 없습니다.\n직접 입력 탭에 텍스트를 붙여넣어 주세요.');
+        }
+
+        // 첫 번째 줄을 노션 페이지 제목으로 분리
+        const allLines = text.split('\n');
+        const titleLine = allLines[0]?.trim() || '';
+        const bodyText = allLines.slice(1).join('\n').replace(/^\n+/, '').trim();
+
+        const titleWrap = document.getElementById('notion-title-wrap');
+        if (titleLine && bodyText) {
+          document.getElementById('notion-title-text').textContent = titleLine;
+          titleWrap.style.display = '';
+          document.getElementById('preview-ta').value = bodyText;
+        } else {
+          titleWrap.style.display = 'none';
+          document.getElementById('preview-ta').value = text;
+        }
+        document.getElementById('preview-wrap').style.display = '';
+        const cnt = (bodyText || text).split('\n').filter(l => l.trim()).length;
+        setFetchStatus('ok', `✓ ${cnt}개 단락 추출됨`);
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        setFetchStatus('err', e.message || '불러오기에 실패했습니다.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Jina Reader: JS 렌더링된 페이지(Notion 등)를 텍스트로 변환
+    // r.jina.ai는 서버사이드 렌더러 + CORS 헤더 포함 → file:// 환경에서도 동작
+    async function fetchViaJinaReader(url, signal) {
+      const jinaUrl = `https://r.jina.ai/${url}`;
+      const res = await timedFetch(jinaUrl, 40000, signal, {
+        headers: {
+          'Accept': 'text/plain',
+          'X-Return-Format': 'text'
+        }
+      });
+      if (!res || !res.ok) throw new Error(`Jina Reader 오류: ${res?.status}`);
+      const raw = await res.text();
+      return cleanJinaOutput(raw);
+    }
+
+    // Jina Reader 출력 정제 (네비게이션/URL/Notion 메타데이터 제거, 타이핑용 클린 텍스트)
+    function cleanJinaOutput(raw) {
+      const lines = raw.split('\n');
+
+      // ─── 1차: 라인별 명시적 필터 ───────────────────────────────────────────
+      const step1 = [];
+      for (const line of lines) {
+        const t = line.trim();
+        if (!t) continue;
+        // URL 라인
+        if (/^https?:\/\//i.test(t)) continue;
+        // 마크다운 링크 (단독 라인)
+        if (/^\[.*\]\(https?:\/\//i.test(t)) continue;
+        // 구분선 (--- ===)
+        if (/^[=\-*_]{3,}$/.test(t)) continue;
+        // 마크다운 이미지
+        if (/^!\[/i.test(t)) continue;
+        // 상대 시간: "1d" "2h" "14d" "1w" "1mo" "1yr" "2d (edited)" 등
+        if (/^\d+\s*(s|m|h|d|w|mo|yr)s?(\s*\(.*\))?$/i.test(t)) continue;
+        // "just now", "yesterday", "today"
+        if (/^(just now|yesterday|today)$/i.test(t)) continue;
+        // "Last edited by" "Created by" 등
+        if (/^(last edited|created by|edited by|updated by|written by)\b/i.test(t)) continue;
+        // Jina Reader 헤더 메타라인: "Title: ..." "URL: ..." "Published Time: ..."
+        if (/^(title|url|source|published time?|author|description):\s/i.test(t)) continue;
+        // Notion/웹사이트 네비게이션 UI 문구
+        if (/^(skip to content|get notion free|sign up|log in|log out|sign in|try for free)$/i.test(t)) continue;
+        // "… more", "... more", "see more", "show more", "load more"
+        if (/^([….]{1,3}\s*more|see more|show more|load more|view more)$/i.test(t)) continue;
+        // 마크다운 헤딩 → 헤딩 기호만 제거, 텍스트 보관
+        if (/^#+\s/.test(t)) { step1.push(t.replace(/^#+\s+/, '')); continue; }
+        step1.push(t);
+      }
+
+      // ─── 2차: 반복 출현 메타데이터 제거 ────────────────────────────────────
+      // 노션 댓글/반응 UI에는 "작성자명\n시간" 패턴이 반복됨.
+      // 짧고(< 30자), 한글 없이, 2회 이상 등장하는 라인을 메타로 판정해 제거.
+      const freq = new Map();
+      for (const line of step1) freq.set(line, (freq.get(line) || 0) + 1);
+
+      const step2 = step1.filter(line => {
+        const cnt = freq.get(line);
+        if (cnt < 2) return true;               // 1회만 나오면 본문일 가능성 높음
+        if (line.length >= 30) return true;     // 충분히 긴 줄은 본문
+        if (/[\uAC00-\uD7A3\u3130-\u318F]/.test(line)) return true; // 한글 포함 시 본문
+        // 짧고, 비한글, 반복 → Notion UI 메타데이터로 판정
+        return false;
+      });
+
+      // ─── 3차: 연속 중복 라인 제거 (혹시 남은 중복) ─────────────────────────
+      const result = [];
+      let prev = null;
+      for (const line of step2) {
+        if (line !== prev) result.push(line);
+        prev = line;
+      }
+
+      return result.join('\n');
+    }
+
+
+
+    function setFetchStatus(type, msg) {
+      const el = document.getElementById('fetch-status');
+      const cls = { loading: 'text-zinc-400 dark:text-zinc-500', ok: 'text-green-600 dark:text-green-400', err: 'text-red-500' }[type];
+      el.className = `mt-2.5 font-mono text-xs min-h-[16px] ${cls}`;
+      el.innerHTML = type === 'loading' ? `<span class="spin"></span>${msg}` : msg;
+    }
+
+
+    async function timedFetch(url, ms, signal, options = {}) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), ms);
+      if (signal) signal.addEventListener('abort', () => ctrl.abort(), { once: true });
+      try {
+        return await fetch(url, { signal: ctrl.signal, ...options });
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    // ─── Text Extraction ──────────────────────────────────────────────────────────
+    function extractText(html) {
+      // ── Strategy 1: Parse Notion's __NEXT_DATA__ JSON (most reliable) ──────
+      try {
+        const nd = extractFromNextData(html);
+        if (nd && nd.trim().length > 30) return cleanText(nd);
+      } catch (_) { }
+
+      // ── Strategy 2: Notion 공개 페이지의 콘텐츠 직접 파싱 ─────────────────
+      // allorigins 등 프록시가 가져오는 HTML에서 텍스트 추출
+      try {
+        const script2 = extractFromRawHtmlPatterns(html);
+        if (script2 && script2.trim().length > 30) return cleanText(script2);
+      } catch (_) { }
+
+      // ── Strategy 3: Notion block class DOM parsing ──────────────────────────
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      ['script', 'style', 'noscript', 'button', 'input', 'select', 'svg', 'img', 'video', 'audio', 'iframe', 'canvas']
+        .forEach(t => doc.querySelectorAll(t).forEach(e => e.remove()));
+
+      // Notion 공개 페이지 전용 선택자 확장
+      const notionRoot =
+        doc.querySelector('.notion-page-content') ||
+        doc.querySelector('[class*="notion"][class*="content"]') ||
+        doc.querySelector('[class*="notionPage"]') ||
+        doc.querySelector('[class*="notion-page"]') ||
+        doc.querySelector('.page-body');
+
+      if (notionRoot) {
+        const result = extractNotionBlocks(notionRoot);
+        if (result.trim().length > 30) return cleanText(result);
+      }
+
+      // ── Strategy 4: 페이지 전체 텍스트 밀도 기반 추출 ──────────────────────
+      // (Notion 공개 페이지가 React hydration 전 상태로 오는 경우 대비)
+      const allText = extractDenseTextBlocks(doc);
+      if (allText.trim().length > 30) return cleanText(allText);
+
+      // ── Strategy 5: Generic block-level HTML extraction ─────────────────────
+      const bodyRoot = doc.querySelector('article')
+        || doc.querySelector('[role="main"]')
+        || doc.querySelector('main')
+        || doc.body;
+      return cleanText(extractBlockText(bodyRoot));
+    }
+
+    // 원시 HTML 문자열에서 Notion 텍스트 패턴 직접 추출
+    function extractFromRawHtmlPatterns(html) {
+      const lines = [];
+
+      // Notion 공개 페이지 텍스트 블록 패턴
+      // data-block-id 속성을 가진 div 내부 텍스트
+      const blockPattern = /<div[^>]+data-block-id[^>]*>([\s\S]*?)<\/div>/gi;
+      let m;
+      const parser2 = new DOMParser();
+      while ((m = blockPattern.exec(html)) !== null) {
+        const inner = m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (inner.length > 2) lines.push(inner);
+      }
+      if (lines.length > 3) return lines.join('\n');
+
+      // notion.site 공개 페이지 — contenteditable=false 블록
+      const cePattern = /contenteditable="false"[^>]*>([\s\S]*?)<\/[a-z]+>/gi;
+      while ((m = cePattern.exec(html)) !== null) {
+        const frag = parser2.parseFromString(m[1], 'text/html');
+        const t = frag.body.textContent.trim();
+        if (t.length > 2 && t.length < 2000) lines.push(t);
+      }
+      if (lines.length > 3) return lines.join('\n');
+
+      return null;
+    }
+
+    // 텍스트 밀도 기반 블록 추출 (React 렌더링이 안 된 HTML 대비)
+    function extractDenseTextBlocks(doc) {
+      const candidates = [];
+      const walkDense = (el, depth) => {
+        if (!el || el.nodeType !== 1) return;
+        const tag = el.tagName || '';
+        if (['SCRIPT', 'STYLE', 'NAV', 'HEADER', 'FOOTER', 'ASIDE', 'BUTTON'].includes(tag)) return;
+        const text = (el.textContent || '').trim();
+        const children = el.children;
+        // 자식 요소가 적고 텍스트가 긴 경우 후보로 추가
+        if (children.length < 5 && text.length > 20 && text.length < 3000) {
+          candidates.push({ text, depth });
+        }
+        for (const child of children) walkDense(child, depth + 1);
+      };
+      walkDense(doc.body, 0);
+
+      // 중복 제거 (짧은 텍스트를 포함하는 긴 텍스트 제거)
+      const filtered = candidates
+        .sort((a, b) => b.depth - a.depth)
+        .filter((c, i, arr) => !arr.slice(0, i).some(prev => prev.text.includes(c.text)));
+
+      return filtered.map(c => c.text).join('\n');
+    }
+
+    // Parse Notion's __NEXT_DATA__ embedded JSON
+    function extractFromNextData(html) {
+      const match = html.match(/<script[^>]+id=["']__NEXT_DATA__["'][^>]*>([\s\S]+?)<\/script>/i);
+      if (!match) return null;
+
+      const data = JSON.parse(match[1]);
+
+      // Try known paths to the block map
+      const blockMap =
+        data?.props?.pageProps?.recordMap?.block ||
+        data?.props?.pageProps?.initialData?.recordMap?.block ||
+        data?.props?.initialProps?.pageChunk?.recordMap?.block ||
+        data?.recordMap?.block;
+      if (!blockMap) return null;
+
+      return extractFromBlockMap(blockMap);
+    }
+
+    function extractFromBlockMap(blockMap) {
+      // Find the root page block (type = 'page', parent is a space not a block)
+      const allBlocks = Object.values(blockMap);
+      const pageBlock = allBlocks.find(b =>
+        b.value?.type === 'page' && b.value?.parent_table !== 'block'
+      ) || allBlocks.find(b => b.value?.type === 'page') || allBlocks[0];
+
+      if (!pageBlock?.value) return null;
+
+      const lines = [];
+      const seen = new Set();
+
+      const SKIP_TYPES = new Set([
+        'image', 'video', 'embed', 'bookmark', 'divider', 'file', 'audio',
+        'equation', 'table_of_contents', 'breadcrumb', 'unsupported',
+        'collection_view', 'collection_view_page'
+      ]);
+
+      function processBlock(id) {
+        if (!id || seen.has(id)) return;
+        seen.add(id);
+        const entry = blockMap[id];
+        if (!entry?.value) return;
+        const { type, properties, content } = entry.value;
+
+        if (!SKIP_TYPES.has(type) && properties?.title) {
+          // Notion rich-text: [[text, [[annotation]]], ...]
+          const text = properties.title
+            .map(part => (Array.isArray(part) && typeof part[0] === 'string' ? part[0] : ''))
+            .join('').trim();
+          if (text) lines.push(text);
+        }
+
+        // Recurse into child blocks
+        if (Array.isArray(content)) content.forEach(processBlock);
+      }
+
+      if (Array.isArray(pageBlock.value.content)) {
+        pageBlock.value.content.forEach(processBlock);
+      }
+
+      return lines.join('\n');
+    }
+
+    // Walk Notion block DOM (fallback when __NEXT_DATA__ not available)
+    function extractNotionBlocks(root) {
+      const BLOCK_RE = /notion-.+-block/;
+      const SKIP_RE = /notion-(image|video|embed|bookmark|divider|table_of_contents|equation|file|audio)-block/;
+      const lines = [], done = new WeakSet();
+
+      function walk(el) {
+        if (done.has(el)) return;
+        const cls = el.getAttribute('class') || '';
+        if (BLOCK_RE.test(cls)) {
+          done.add(el);
+          if (!SKIP_RE.test(cls)) {
+            el.querySelectorAll('*').forEach(c => done.add(c));
+            const t = el.textContent.trim();
+            if (t) lines.push(t);
+          }
+        } else {
+          Array.from(el.children).forEach(walk);
+        }
+      }
+      walk(root);
+      return lines.join('\n');
+    }
+
+    // Generic block-level extractor for non-Notion pages
+    function extractBlockText(root) {
+      const BLOCK = new Set(['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'PRE', 'TD', 'TH']);
+      const SKIP = new Set(['SCRIPT', 'STYLE', 'NAV', 'HEADER', 'FOOTER', 'ASIDE', 'BUTTON', 'FORM']);
+      const lines = [], done = new WeakSet();
+      function walk(el) {
+        if (done.has(el) || SKIP.has(el.tagName)) return;
+        if (BLOCK.has(el.tagName)) {
+          done.add(el); el.querySelectorAll('*').forEach(c => done.add(c));
+          const t = el.textContent.trim(); if (t) lines.push(t);
+        } else { Array.from(el.children).forEach(walk); }
+      }
+      walk(root);
+      return lines.join('\n');
+    }
+
+    function cleanText(raw) {
+      return raw
+        .replace(/[\t ]+/g, ' ')
+        .replace(/ ?\n ?/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    }
+
+    // ─── Start game ───────────────────────────────────────────────────────────────
+    function onStartFromPreview() {
+      const t = document.getElementById('preview-ta').value.trim();
+      if (t) startGame(t);
+    }
+    function startGame(text) {
+      originalText = text;
+      initTyping(text);
+      showScreen('s-typing');
+      refocus();
+    }
+
+    // ─── Typing state ─────────────────────────────────────────────────────────────
+    let originalText = '';
+    let chars = [];   // { char, state, el }
+    let cursorIdx = 0;
+    let errorCount = 0;
+    let startTime = null;
+    let totalTyped = 0;
+    let correctTyped = 0;
+    let isComposing = false;
+    let justComposed = false;
+    let compositionMatched = false; // compositionupdate에서 음절 완성 감지
+    let spaceQueued = false; // 한글 조합 중/직후 스페이스 누름 대기
+    let errorLog = [];
+
+    const display = document.getElementById('text-display');
+    const hiddenInp = document.getElementById('hidden-inp');
+
+    // ─── Build text display ───────────────────────────────────────────────────────
+    function initTyping(text) {
+      chars = []; cursorIdx = 0; errorCount = 0; startTime = null;
+      totalTyped = 0; correctTyped = 0; errorLog = [];
+      isComposing = false; justComposed = false; compositionMatched = false;
+      spaceQueued = false;
+      hiddenInp.value = '';
+      display.innerHTML = '';
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const span = document.createElement('span');
+        span.className = 'ch ch-untyped';
+        if (ch === '\n') { span.textContent = '↵'; span.classList.add('ch-nl'); }
+        else if (ch === ' ') { span.innerHTML = '&nbsp;'; }
+        else { span.textContent = ch; }
+        display.appendChild(span);
+        chars.push({ char: ch, state: 'untyped', el: span });
+        if (ch === '\n') display.appendChild(document.createElement('br'));
+      }
+
+      if (chars.length) applyState(0, 'cursor');
+      updateStats();
+    }
+
+    // ─── Char content helpers ─────────────────────────────────────────────────────
+    // Restore a span's text content to match its target character
+    function restoreContent(i) {
+      if (i < 0 || i >= chars.length) return;
+      const c = chars[i];
+      if (c.char === '\n') c.el.textContent = '↵';
+      else if (c.char === ' ') c.el.innerHTML = '&nbsp;';
+      else c.el.textContent = c.char;
+    }
+
+    // Apply CSS state class (without changing text content)
+    function applyState(i, state) {
+      if (i < 0 || i >= chars.length) return;
+      const c = chars[i];
+      let cls = 'ch';
+      if (c.char === '\n') cls += ' ch-nl';
+      if (state === 'cursor') cls += ' ch-cursor';
+      else if (state === 'correct') cls += ' ch-correct';
+      else if (state === 'incorrect') cls += ' ch-incorrect';
+      else if (state === 'skipped') cls += ' ch-skipped';
+      else if (state === 'composing') cls += ' ch-composing';
+      else cls += ' ch-untyped';
+      c.el.className = cls;
+      c.state = state;
+    }
+
+    // ─── IME composing display ────────────────────────────────────────────────────
+    // Called on compositionupdate: temporarily show the partial syllable at cursor
+    function showComposing(data) {
+      if (cursorIdx >= chars.length) return;
+      const c = chars[cursorIdx];
+      // Set composing style
+      applyState(cursorIdx, 'composing');
+      // Show the composing string (e.g. "ㅁ" → "머" → "멀")
+      c.el.textContent = data || c.char;
+    }
+
+    // ─── Type a character ─────────────────────────────────────────────────────────
+    function typeChar(key) {
+      if (cursorIdx >= chars.length) return;
+      if (!startTime) startTime = performance.now();
+
+      const expected = chars[cursorIdx].char;
+      const correct = key === expected;
+
+      totalTyped++;
+      if (correct) {
+        restoreContent(cursorIdx);
+        correctTyped++;
+        applyState(cursorIdx, 'correct');
+      } else {
+        errorCount++;
+        errorLog.push({ index: cursorIdx, expected: expected, got: key });
+        // 실제로 입력한 글자를 표시해야 오타를 확인할 수 있음
+        if (key === '\n') { chars[cursorIdx].el.textContent = '↵'; }
+        else if (key === ' ') { chars[cursorIdx].el.innerHTML = '&nbsp;'; }
+        else { chars[cursorIdx].el.textContent = key; }
+        applyState(cursorIdx, 'incorrect');
+      }
+      advance();
+    }
+
+    function getCharType(ch) {
+      if (isKorean(ch)) return 'korean';
+      if (isEnglish(ch)) return 'english';
+      if (/\d/.test(ch)) return 'digit';
+      return 'symbol';
+    }
+
+    function skipChunk() {
+      if (cursorIdx >= chars.length) return;
+      const startCh = chars[cursorIdx].char;
+      if (startCh === ' ') return;
+      const chunkType = getCharType(startCh);
+
+      let cnt = 0;
+      while (cursorIdx < chars.length) {
+        const ch = chars[cursorIdx].char;
+        if (ch === ' ' || getCharType(ch) !== chunkType) break;
+        restoreContent(cursorIdx);
+        totalTyped++;
+        // 설정상 스킵 허용 문자(또는 줄바꿈)는 skipped, 그 외는 incorrect
+        if (isSkippable(ch) || ch === '\n') {
+          correctTyped++;
+          applyState(cursorIdx, 'skipped');
+        } else {
+          errorCount++;
+          errorLog.push({ index: cursorIdx, expected: ch, got: ' ' });
+          applyState(cursorIdx, 'incorrect');
+        }
+        cursorIdx++;
+        cnt++;
+      }
+
+      if (cnt === 0) return;
+
+      // 덩어리 스킵 후 바로 이어지는 공백도 함께 스킵
+      // ex) "목록,⏵위치" → 쉬표 스킵 후 스페이스도 자동 처리
+      if (cursorIdx < chars.length && chars[cursorIdx].char === ' ') {
+        restoreContent(cursorIdx);
+        totalTyped++;
+        correctTyped++;
+        applyState(cursorIdx, 'skipped');
+        cursorIdx++;
+      }
+
+      if (cursorIdx < chars.length) { applyState(cursorIdx, 'cursor'); scrollCursor(); }
+      updateStats();
+      if (cursorIdx >= chars.length) setTimeout(showResults, 450);
+    }
+
+    function advance() {
+      cursorIdx++;
+      if (cursorIdx < chars.length) { applyState(cursorIdx, 'cursor'); scrollCursor(); }
+      updateStats();
+      if (cursorIdx >= chars.length) setTimeout(showResults, 450);
+    }
+
+    // ─── Backspace ────────────────────────────────────────────────────────────────
+    function backspace() {
+      if (cursorIdx === 0) return;
+      if (cursorIdx < chars.length) applyState(cursorIdx, 'untyped');
+      cursorIdx--;
+
+      const prev = chars[cursorIdx];
+      restoreContent(cursorIdx);
+
+      if (prev.state === 'correct' || prev.state === 'skipped') {
+        totalTyped = Math.max(0, totalTyped - 1);
+        correctTyped = Math.max(0, correctTyped - 1);
+      } else if (prev.state === 'incorrect') {
+        totalTyped = Math.max(0, totalTyped - 1);
+        errorCount = Math.max(0, errorCount - 1);
+        for (let i = errorLog.length - 1; i >= 0; i--)
+          if (errorLog[i].index === cursorIdx) { errorLog.splice(i, 1); break; }
+      }
+
+      applyState(cursorIdx, 'cursor');
+      scrollCursor();
+      updateStats();
+    }
+
+    function scrollCursor() {
+      if (cursorIdx < chars.length)
+        chars[cursorIdx].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+
+    function updateStats() {
+      const total = chars.length;
+      const progress = total > 0 ? Math.round((cursorIdx / total) * 100) : 0;
+      const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : null;
+      document.getElementById('st-prog').textContent = progress + '%';
+      document.getElementById('st-acc').textContent = accuracy !== null ? accuracy + '%' : '—';
+      document.getElementById('st-err').textContent = errorCount;
+      document.getElementById('prog-bar-fill').style.width = progress + '%';
+    }
+
+    // ─── 한글 자모 판별 헬퍼 ─────────────────────────────────────────────────────
+    // 자음/모음(자모)만으로 구성된 문자열인지 판별 (완성형 음절 없음)
+    function isJamoOnly(str) {
+      return str.length > 0 && /^[\u3131-\u318E]+$/.test(str);
+    }
+    // 완성형 한글 음절 포함 여부
+    function hasKoreanSyllable(str) {
+      return /[\uAC00-\uD7A3]/.test(str);
+    }
+
+    // ─── Space-queue helper ───────────────────────────────────────────────────────
+    // 조합 중/직후 눌린 스페이스를 처리: 다음 문자가 공백이면 typeChar, 아니면 skipChunk
+    function handleQueuedSpace() {
+      justComposed = false;
+      if (!spaceQueued) return;
+      spaceQueued = false;
+      if (cursorIdx >= chars.length) return;
+      if (chars[cursorIdx].char === ' ') {
+        typeChar(' ');
+      } else {
+        skipChunk();
+      }
+    }
+
+    // ─── IME-safe input events ────────────────────────────────────────────────────
+    hiddenInp.addEventListener('compositionstart', () => {
+      isComposing = true;
+      justComposed = false;
+      // ⚠️ compositionMatched는 여기서 리셋하지 않음!
+      // 일부 Windows IME는 compositionstart가 compositionend보다 먹저 발화함.
+      // 리셋을 여기서 하면 compositionend가 typeChar를 중복 호출하는 버그 발생.
+      // compositionMatched 해제는 compositionend와 compositionupdate에서만 수행.
+    });
+
+    hiddenInp.addEventListener('compositionupdate', e => {
+      const data = e.data || '';
+      if (!data) return;
+
+      if (cursorIdx < chars.length) {
+        const expected = chars[cursorIdx].char;
+        // ── 핵심: compositionupdate에서 음절 완성 감지 ──────────────────────────
+        // ㅇ 입력 → data="ㅇ" ≠ "음" → showComposing만 (advance 안 됨)
+        // ㅡ 입력 → data="으" ≠ "음" → showComposing만
+        // ㅁ 입력 → data="음" = "음" → typeChar("음") → advance ✓
+        if (data === expected && hasKoreanSyllable(expected)) {
+          compositionMatched = true;
+          typeChar(data); // typeChar가 advance + 통계 처리를 모두 담당
+          return;
+        }
+      }
+
+      compositionMatched = false;
+      showComposing(data);
+    });
+
+    hiddenInp.addEventListener('compositionend', e => {
+      isComposing = false;
+      justComposed = true;
+      hiddenInp.value = ''; // input 이벤트가 남은 값을 읽지 못하게 선제 차단
+
+      const data = e.data || '';
+
+      if (compositionMatched) {
+        // compositionupdate 에서 이미 advance 완료 → cleanup만 수행
+        compositionMatched = false;
+        restoreContent(cursorIdx);
+        applyState(cursorIdx, 'cursor');
+        // ── spaceQueued 전역 변수를 타임아웃 시점에 읽음
+        // (스페이스가 compositionend 전에 눌렸으면 이미 true,
+        //  auto-finalize 후 50ms 사이에 눌렸으면 타임아웃 시점에 true)
+        setTimeout(handleQueuedSpace, 50);
+        return;
+      }
+
+      restoreContent(cursorIdx);
+
+      if (data) {
+        const expected = cursorIdx < chars.length ? chars[cursorIdx].char : '';
+
+        if (isJamoOnly(data) && hasKoreanSyllable(expected)) {
+          showComposing(data);
+          setTimeout(() => { justComposed = false; spaceQueued = false; }, 50);
+          return;
+        }
+
+        if (hasKoreanSyllable(data) && cursorIdx > 0) {
+          const prevChar = chars[cursorIdx - 1];
+          if (prevChar && prevChar.char === data && prevChar.state === 'correct') {
+            applyState(cursorIdx, 'cursor');
+            setTimeout(handleQueuedSpace, 50);
+            return;
+          }
+        }
+
+        for (const ch of data) typeChar(ch);
+      } else {
+        applyState(cursorIdx, 'cursor');
+      }
+
+      setTimeout(handleQueuedSpace, 50);
+    });
+
+    hiddenInp.addEventListener('keydown', e => {
+      // Ctrl+R: 현재 텍스트로 처음부터 다시 시작
+      if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        onRetry();
+        return;
+      }
+
+      // ── 스페이스: 조합 중(isComposing) 또는 조합 직후 50ms(justComposed) 어느 경우든 감지 ──
+      // 이 두 창에서 스페이스를 놓치면 input이 justComposed로 차단되어 공백이 소실됨.
+      if (e.key === ' ' && (isComposing || justComposed)) {
+        e.preventDefault();
+        spaceQueued = true;
+        return;
+      }
+
+      if (isComposing) return;
+
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        backspace();
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        typeChar('\n');
+        return;
+      }
+      // 스페이스바: 공백이 아닌 모든 문자 → 버터야리/설정 무관하게 덩어리 스킵
+      // 공백(' ')만 예외적으로 input 이벤트로 위임 (실제 타이핑)
+      if (e.key === ' ') {
+        const expected = chars[cursorIdx]?.char;
+        if (expected !== undefined && expected !== ' ') {
+          e.preventDefault();
+          skipChunk();
+          return;
+        }
+      }
+    });
+
+    hiddenInp.addEventListener('input', e => {
+      if (isComposing || e.isComposing || justComposed) return;
+      const val = hiddenInp.value;
+      if (!val) return;
+      // ── 추가 안전망: IME 이벤트 없이 자모가 직접 input에 들어온 경우 ──────
+      // (일부 IME 환경에서 compositionstart/end 없이 jamo가 바로 발화됨)
+      if (cursorIdx < chars.length && isJamoOnly(val) && hasKoreanSyllable(chars[cursorIdx].char)) {
+        showComposing(val);
+        hiddenInp.value = '';
+        return;
+      }
+      for (const ch of val) typeChar(ch);
+      hiddenInp.value = '';
+    });
+
+    // Keep focus
+    document.getElementById('s-typing').addEventListener('click', e => {
+      if (!e.target.closest('button') && !e.target.closest('#settings-panel')) refocus();
+    });
+
+    function refocus() { hiddenInp.value = ''; hiddenInp.focus(); }
+    function onBack() { showScreen('s-input'); }
+
+    // ─── Results screen ───────────────────────────────────────────────────────────
+    function showResults() {
+      const elapsed = startTime ? performance.now() - startTime : 0;
+      const secs = Math.round(elapsed / 1000);
+      const mins = elapsed / 60000;
+      const wpm = mins > 0 ? Math.round((correctTyped / 5) / mins) : 0;
+      const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 100;
+      const timeStr = secs >= 60 ? `${Math.floor(secs / 60)}m ${secs % 60}s` : `${secs}s`;
+
+      document.getElementById('r-time').textContent = timeStr;
+      document.getElementById('r-wpm').textContent = wpm;
+      document.getElementById('r-acc').textContent = accuracy + '%';
+      document.getElementById('r-errs').textContent = errorCount;
+      showScreen('s-results');
+    }
+
+    function onRetry() { initTyping(originalText); showScreen('s-typing'); refocus(); }
+    function onNewText() { showScreen('s-input'); }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────────
+    showScreen('s-input');
+  </script>
+
+</body>
+
+</html>
