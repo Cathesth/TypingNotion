@@ -151,13 +151,13 @@
       opacity: .7;
     }
 
-    /* ── Skip indicator (greyed correct) ──────────────────────────────── */
+    /* ── Skip indicator (correct로 처리된 스킵 — correct와 동일 색) ─────── */
     .ch-skipped {
-      color: #a3a3a3;
+      color: #18181b;
     }
 
     .dark .ch-skipped {
-      color: #52525b;
+      color: #fafafa;
     }
 
     /* ── Header / progress bar ─────────────────────────────────────────── */
@@ -178,6 +178,13 @@
       z-index: 50;
       min-width: 200px;
     }
+
+    /* ── Custom modal ─────────────────────────────────────────────────── */
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(.95) translateY(4px); }
+      to   { opacity: 1; transform: scale(1)  translateY(0); }
+    }
+    .modal-box { animation: modal-in .15s ease-out; }
 
     /* ── Spinner ───────────────────────────────────────────────────────── */
     @keyframes spin {
@@ -218,6 +225,45 @@
       color: #818cf8;
       border-bottom-color: #818cf8;
     }
+
+    /* ── Loop selection ────────────────────────────────────────────────── */
+    .loop-marker {
+      color: #6366f1;
+      font-weight: 700;
+      font-size: 1em;
+      cursor: grab;
+      user-select: none;
+    }
+    .loop-marker:active { cursor: grabbing; }
+    .dark .loop-marker { color: #818cf8; }
+
+    .ch-loop-range {
+      background: rgba(99, 102, 241, .07);
+      border-radius: 2px;
+    }
+    .dark .ch-loop-range {
+      background: rgba(129, 140, 248, .09);
+    }
+
+    #text-display.loop-select-mode .ch {
+      cursor: crosshair;
+    }
+    #text-display.loop-select-mode .ch:not(.ch-loop-range):hover {
+      background: rgba(99, 102, 241, .12);
+      border-radius: 2px;
+    }
+    .dark #text-display.loop-select-mode .ch:not(.ch-loop-range):hover {
+      background: rgba(129, 140, 248, .14);
+    }
+
+    .ch-loop-drag-hover {
+      outline: 2px dashed rgba(99, 102, 241, .55);
+      outline-offset: -1px;
+      border-radius: 2px;
+    }
+    .dark .ch-loop-drag-hover {
+      outline-color: rgba(129, 140, 248, .6);
+    }
   </style>
 </head>
 
@@ -226,7 +272,7 @@
   <!-- ══════════════════════════════════════════════
      SCREEN 1 — INPUT
 ══════════════════════════════════════════════ -->
-  <div id="s-input" class="min-h-screen flex flex-col items-center justify-center px-6 py-16">
+  <div id="s-input" class="min-h-screen flex flex-col items-center px-6 pt-20 pb-16">
     <div class="w-full max-w-xl">
 
       <div class="flex items-center justify-between mb-2">
@@ -292,6 +338,58 @@
           </button>
         </div>
         <p id="fetch-status" class="mt-2.5 font-mono text-xs min-h-[16px]"></p>
+
+        <!-- 노션 게시 가이드 -->
+        <div class="mt-3">
+          <button onclick="toggleGuide()" class="flex items-center gap-1.5 font-mono text-xs text-zinc-400 dark:text-zinc-500
+                 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors group">
+            <svg id="guide-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+              class="transition-transform duration-200">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+            노션 URL 사용법
+          </button>
+          <div id="guide-panel" style="display:none" class="mt-3">
+            <p class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed mb-3">
+              노션 페이지를 <span class="text-zinc-600 dark:text-zinc-300 font-medium">게시(Publish)</span>한 후 URL을 복사해 붙여넣으세요.
+            </p>
+            <div class="grid grid-cols-2 gap-2">
+              <!-- Step 1 -->
+              <div class="space-y-1">
+                <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
+                  <span class="text-indigo-400 font-semibold">01</span> 공유 버튼 클릭
+                </p>
+                <img src="https://github.com/user-attachments/assets/a7b7619a-81c3-4e1e-a008-a0d200d59a71"
+                  alt="공유 버튼 클릭" class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
+              </div>
+              <!-- Step 2 -->
+              <div class="space-y-1">
+                <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
+                  <span class="text-indigo-400 font-semibold">02</span> 게시 탭으로 이동
+                </p>
+                <img src="https://github.com/user-attachments/assets/8362668f-3ad2-4ff7-b430-724b7ad21d92"
+                  alt="게시 탭 이동" class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
+              </div>
+              <!-- Step 3 -->
+              <div class="space-y-1">
+                <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
+                  <span class="text-indigo-400 font-semibold">03</span> 게시 버튼 클릭
+                </p>
+                <img src="https://github.com/user-attachments/assets/472f40b4-6dbc-4d6d-bc5a-efc72ef4d22b"
+                  alt="게시 버튼 클릭" class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
+              </div>
+              <!-- Step 4 -->
+              <div class="space-y-1">
+                <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
+                  <span class="text-indigo-400 font-semibold">04</span> 주소 복사 후 붙여넣기
+                </p>
+                <img src="https://github.com/user-attachments/assets/27103dfb-3e76-40a9-abf3-ba1ea588a1c0"
+                  alt="주소 복사" class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
+              </div>
+            </div>
+          </div>
+        </div>
         <div id="preview-wrap" style="display:none" class="mt-4">
           <p class="font-mono text-xs text-zinc-400 dark:text-zinc-500 mb-1.5">추출된 텍스트 — 수정 후 시작하세요</p>
           <div id="notion-title-wrap" style="display:none" class="mb-3 px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
@@ -354,7 +452,24 @@
                dark:hover:text-zinc-300 transition-colors whitespace-nowrap">
           ← 처음으로
         </button>
-        <span class="font-mono text-[10px] text-zinc-300 dark:text-zinc-600 mr-auto whitespace-nowrap">Ctrl+R 재시작</span>
+        <span class="font-mono text-[10px] text-zinc-300 dark:text-zinc-600 whitespace-nowrap">Ctrl+R 재시작</span>
+
+        <!-- 구간반복 진입 버튼 (루프 모드 아닐 때) -->
+        <button id="loop-select-btn" onclick="enterLoopSelectMode()" class="font-mono text-[10px] text-zinc-400 hover:text-zinc-700
+               dark:hover:text-zinc-300 transition-colors whitespace-nowrap">구간반복</button>
+
+        <!-- 선택 모드 안내 (클릭 중) -->
+        <span id="loop-select-hint" style="display:none"
+              class="font-mono text-[10px] text-indigo-500 dark:text-indigo-400 whitespace-nowrap"></span>
+
+        <!-- 루프 중 표시 -->
+        <span id="loop-round-info" style="display:none"
+              class="font-mono text-xs font-semibold text-indigo-500 dark:text-indigo-400 whitespace-nowrap tabular-nums"></span>
+        <button id="loop-exit-btn" style="display:none" onclick="exitLoopMode()"
+               class="font-mono text-[10px] text-zinc-400 hover:text-red-500
+               dark:hover:text-red-400 transition-colors whitespace-nowrap">구간반복 끝내기</button>
+
+        <span class="mr-auto"></span>
 
         <div class="flex items-center gap-1.5">
           <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">진행</span>
@@ -477,6 +592,56 @@
 
 
   <!-- ══════════════════════════════════════════════
+     CUSTOM MODAL
+══════════════════════════════════════════════ -->
+  <div id="md-modal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div onclick="mdModalCancel()" class="absolute inset-0 bg-black/20 dark:bg-black/40"></div>
+    <div class="modal-box relative bg-white dark:bg-zinc-900 rounded-2xl shadow-xl
+                border border-zinc-100 dark:border-zinc-800 p-5 w-full max-w-[272px]">
+      <p class="font-mono text-sm font-semibold text-zinc-800 dark:text-zinc-100 mb-1.5">마크다운 기호 감지</p>
+      <p class="font-mono text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed mb-5">
+        #, ** 기호가 포함되어 있습니다.<br>제거하고 시작할까요?
+      </p>
+      <div class="flex gap-2 justify-end">
+        <button onclick="mdModalCancel()" class="px-3.5 py-1.5 font-mono text-xs rounded-lg
+               text-zinc-500 dark:text-zinc-400
+               hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+          취소
+        </button>
+        <button onclick="mdModalConfirm()" class="px-3.5 py-1.5 font-mono text-xs font-medium rounded-lg
+               bg-indigo-500 hover:bg-indigo-600 text-white transition-colors">
+          제거하고 시작
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+     LOOP COUNT PANEL (bottom sheet)
+══════════════════════════════════════════════ -->
+  <div id="loop-count-panel" style="display:none"
+       class="fixed bottom-0 left-0 right-0 z-30
+              bg-white/95 dark:bg-zinc-900/95
+              border-t border-zinc-100 dark:border-zinc-800
+              backdrop-blur-sm">
+    <div class="max-w-lg mx-auto px-6 py-4 flex items-center gap-4">
+      <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400 shrink-0">반복 횟수</span>
+      <span id="loop-count-display" class="font-mono text-sm font-bold text-indigo-500 dark:text-indigo-400 w-7 text-center shrink-0">5</span>
+      <div class="flex items-center gap-2 flex-1">
+        <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 shrink-0">1</span>
+        <input type="range" id="loop-count-slider" min="1" max="21" value="5"
+               oninput="updateLoopSlider(this.value)"
+               class="flex-1 accent-indigo-500 cursor-pointer">
+        <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 shrink-0">∞</span>
+      </div>
+      <button onclick="cancelLoopSelect()" class="font-mono text-xs text-zinc-400 hover:text-zinc-600
+             dark:hover:text-zinc-300 transition-colors shrink-0">취소</button>
+      <button onclick="startLoopMode()" class="px-3.5 py-1.5 font-mono text-xs font-medium rounded-lg
+             bg-indigo-500 hover:bg-indigo-600 text-white transition-colors shrink-0">시작 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
      SCRIPT
 ══════════════════════════════════════════════ -->
   <script>
@@ -531,6 +696,13 @@
     }
 
     let settingsOpen = false;
+    let guideOpen = false;
+    function toggleGuide() {
+      guideOpen = !guideOpen;
+      document.getElementById('guide-panel').style.display = guideOpen ? '' : 'none';
+      document.getElementById('guide-chevron').style.transform = guideOpen ? 'rotate(90deg)' : '';
+    }
+
     function toggleSettings(e) {
       e.stopPropagation();
       settingsOpen = !settingsOpen;
@@ -566,7 +738,10 @@
     }
 
     // ─── Tab switching ────────────────────────────────────────────────────────────
+    let lastTab = 'url';
+
     function switchTab(tab) {
+      lastTab = tab;
       const isUrl = tab === 'url';
       document.getElementById('panel-url').style.display = isUrl ? '' : 'none';
       document.getElementById('panel-text').style.display = isUrl ? 'none' : '';
@@ -581,7 +756,52 @@
     sourceTA.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (!startBtnTx.disabled) onStartFromText(); }
     });
-    function onStartFromText() { const t = sourceTA.value.trim(); if (t) startGame(t); }
+    // 줄 맨 앞 # 헤딩 또는 ** 볼드 마커가 있는지 감지
+    function hasMarkdown(text) {
+      return /^[ \t]*#+[ \t]/m.test(text) || /\*\*/.test(text);
+    }
+
+    // # 헤딩 / ** 볼드 마커 및 인접 공백 제거
+    function cleanMarkdown(text) {
+      return text
+        .replace(/^[ \t]*#+[ \t]*/gm, '')  // 줄 시작 #+공백 제거 (### Q9. → Q9.)
+        .replace(/\*\*/g, '')               // ** 마커 제거
+        .replace(/[ \t]{2,}/g, ' ')        // 연속 가로 공백 정리
+        .replace(/^[ \t]+/gm, '')          // 줄 앞 남은 공백 제거
+        .replace(/[ \t]+$/gm, '')          // 줄 뒤 남은 공백 제거
+        .trim();
+    }
+
+    // ─── Markdown modal ───────────────────────────────────────────────────────────
+    let _mdResolve = null;
+    function showMdModal() {
+      return new Promise(resolve => {
+        _mdResolve = resolve;
+        document.getElementById('md-modal').style.display = 'flex';
+      });
+    }
+    function mdModalConfirm() {
+      document.getElementById('md-modal').style.display = 'none';
+      if (_mdResolve) { _mdResolve(true); _mdResolve = null; }
+    }
+    function mdModalCancel() {
+      document.getElementById('md-modal').style.display = 'none';
+      if (_mdResolve) { _mdResolve(false); _mdResolve = null; }
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.getElementById('md-modal').style.display !== 'none') mdModalCancel();
+    });
+
+    async function onStartFromText() {
+      const raw = sourceTA.value.trim();
+      if (!raw) return;
+      if (hasMarkdown(raw)) {
+        if (await showMdModal()) startGame(cleanMarkdown(raw));
+        else startGame(raw);
+      } else {
+        startGame(raw);
+      }
+    }
 
     // ─── URL Fetch ────────────────────────────────────────────────────────────────
     let fetchAbort = null;
@@ -703,7 +923,7 @@
         prev = line;
       }
 
-      return result.join('\n');
+      return result.join('\n').replace(/\*\*/g, '');
     }
 
 
@@ -958,7 +1178,6 @@
     let correctTyped = 0;
     let isComposing = false;
     let justComposed = false;
-    let compositionMatched = false; // compositionupdate에서 음절 완성 감지
     let spaceQueued = false; // 한글 조합 중/직후 스페이스 누름 대기
     let errorLog = [];
 
@@ -969,8 +1188,7 @@
     function initTyping(text) {
       chars = []; cursorIdx = 0; errorCount = 0; startTime = null;
       totalTyped = 0; correctTyped = 0; errorLog = [];
-      isComposing = false; justComposed = false; compositionMatched = false;
-      spaceQueued = false;
+      isComposing = false; justComposed = false; spaceQueued = false;
       hiddenInp.value = '';
       display.innerHTML = '';
 
@@ -1175,70 +1393,34 @@
     hiddenInp.addEventListener('compositionstart', () => {
       isComposing = true;
       justComposed = false;
-      // ⚠️ compositionMatched는 여기서 리셋하지 않음!
-      // 일부 Windows IME는 compositionstart가 compositionend보다 먹저 발화함.
-      // 리셋을 여기서 하면 compositionend가 typeChar를 중복 호출하는 버그 발생.
-      // compositionMatched 해제는 compositionend와 compositionupdate에서만 수행.
     });
 
+    // compositionupdate: 조합 중인 문자 시각적으로만 표시, advance는 compositionend에서만
+    // 이렇게 해야 '테'(ㅌ+ㅔ) 입력 후 ㅇ을 누를 때 '텡'이 '테' 자리에 표시되고,
+    // ㅣ까지 입력해야 '이'로 확정되는 올바른 한글 IME 동작이 구현됨.
     hiddenInp.addEventListener('compositionupdate', e => {
       const data = e.data || '';
       if (!data) return;
-
-      if (cursorIdx < chars.length) {
-        const expected = chars[cursorIdx].char;
-        // ── 핵심: compositionupdate에서 음절 완성 감지 ──────────────────────────
-        // ㅇ 입력 → data="ㅇ" ≠ "음" → showComposing만 (advance 안 됨)
-        // ㅡ 입력 → data="으" ≠ "음" → showComposing만
-        // ㅁ 입력 → data="음" = "음" → typeChar("음") → advance ✓
-        if (data === expected && hasKoreanSyllable(expected)) {
-          compositionMatched = true;
-          typeChar(data); // typeChar가 advance + 통계 처리를 모두 담당
-          return;
-        }
-      }
-
-      compositionMatched = false;
       showComposing(data);
     });
 
     hiddenInp.addEventListener('compositionend', e => {
       isComposing = false;
       justComposed = true;
-      hiddenInp.value = ''; // input 이벤트가 남은 값을 읽지 못하게 선제 차단
+      hiddenInp.value = '';
 
       const data = e.data || '';
-
-      if (compositionMatched) {
-        // compositionupdate 에서 이미 advance 완료 → cleanup만 수행
-        compositionMatched = false;
-        restoreContent(cursorIdx);
-        applyState(cursorIdx, 'cursor');
-        // ── spaceQueued 전역 변수를 타임아웃 시점에 읽음
-        // (스페이스가 compositionend 전에 눌렸으면 이미 true,
-        //  auto-finalize 후 50ms 사이에 눌렸으면 타임아웃 시점에 true)
-        setTimeout(handleQueuedSpace, 50);
-        return;
-      }
 
       restoreContent(cursorIdx);
 
       if (data) {
         const expected = cursorIdx < chars.length ? chars[cursorIdx].char : '';
 
+        // 자모만 있고 음절을 기대 중: 아직 조합 미완성 (backspace 등 엣지 케이스)
         if (isJamoOnly(data) && hasKoreanSyllable(expected)) {
           showComposing(data);
           setTimeout(() => { justComposed = false; spaceQueued = false; }, 50);
           return;
-        }
-
-        if (hasKoreanSyllable(data) && cursorIdx > 0) {
-          const prevChar = chars[cursorIdx - 1];
-          if (prevChar && prevChar.char === data && prevChar.state === 'correct') {
-            applyState(cursorIdx, 'cursor');
-            setTimeout(handleQueuedSpace, 50);
-            return;
-          }
         }
 
         for (const ch of data) typeChar(ch);
@@ -1250,6 +1432,13 @@
     });
 
     hiddenInp.addEventListener('keydown', e => {
+      // 선택 모드 중: Escape로 취소, 나머지 타이핑 차단
+      if (loopSelectMode) {
+        if (e.key === 'Escape') { e.preventDefault(); cancelLoopSelect(); }
+        else e.preventDefault();
+        return;
+      }
+
       // Ctrl+R: 현재 텍스트로 처음부터 다시 시작
       if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
         e.preventDefault();
@@ -1304,16 +1493,38 @@
       hiddenInp.value = '';
     });
 
-    // Keep focus
+    // Keep focus (선택 모드 중에는 refocus 안 함 — text 클릭이 text-display 핸들러로 가야 함)
     document.getElementById('s-typing').addEventListener('click', e => {
+      if (loopSelectMode) return;
       if (!e.target.closest('button') && !e.target.closest('#settings-panel')) refocus();
     });
 
     function refocus() { hiddenInp.value = ''; hiddenInp.focus(); }
-    function onBack() { showScreen('s-input'); }
+    function onBack() {
+      if (loopSelectMode) cancelLoopSelect();
+      if (loopMode) { loopMode = false; updateLoopSelectUI(); }
+      showScreen('s-input');
+      switchTab(lastTab);
+    }
 
     // ─── Results screen ───────────────────────────────────────────────────────────
+    let _wasLoopSession = false; // 구간반복 완료 후 결과 화면인지
+
     function showResults() {
+      if (loopMode) {
+        // 다음 라운드 여부 확인
+        if (_loopCount === 0 || _loopRound < _loopCount) {
+          _loopRound++;
+          updateLoopSelectUI();
+          initTyping(_loopText);
+          return; // 타이핑 창 유지
+        }
+        // 모든 라운드 완료 → 루프 종료 후 결과 표시
+        _wasLoopSession = true;
+        loopMode = false;
+        updateLoopSelectUI();
+      }
+
       const elapsed = startTime ? performance.now() - startTime : 0;
       const secs = Math.round(elapsed / 1000);
       const mins = elapsed / 60000;
@@ -1328,8 +1539,270 @@
       showScreen('s-results');
     }
 
-    function onRetry() { initTyping(originalText); showScreen('s-typing'); refocus(); }
-    function onNewText() { showScreen('s-input'); }
+    function onRetry() {
+      if (_wasLoopSession) {
+        // 구간반복 세션이었으면 → 구간반복 처음부터 다시
+        _wasLoopSession = false;
+        loopMode = true;
+        _loopRound = 1;
+        updateLoopSelectUI();
+        initTyping(_loopText);
+        showScreen('s-typing');
+        refocus();
+        return;
+      }
+      if (loopSelectMode) cancelLoopSelect();
+      if (loopMode) { loopMode = false; updateLoopSelectUI(); }
+      initTyping(originalText);
+      showScreen('s-typing');
+      refocus();
+    }
+    function onNewText() { _wasLoopSession = false; showScreen('s-input'); switchTab(lastTab); }
+
+    // ─── Loop mode ────────────────────────────────────────────────────────────────
+    let loopMode = false;
+    let loopSelectMode = false;
+    let loopSelectStep = 0; // 1 = 시작 대기, 2 = 끝 대기, 3 = 둘 다 선택됨
+    let _loopStartIdx = -1; // chars[] index
+    let _loopEndIdx = -1;
+    let _loopText = '';
+    let _loopCount = 5;      // 0 = ∞
+    let _loopRound = 0;
+    let _loopFullText = '';
+    let _startMarkerEl = null;  // 현재 DOM에 있는 「 마커 요소
+    let _endMarkerEl = null;    // 현재 DOM에 있는 」 마커 요소
+    let _loopDragging = null;   // 'start' | 'end' | null
+    let _loopDragHoverIdx = -1; // 드래그 중 hover 표시 중인 chars 인덱스
+
+    function enterLoopSelectMode() {
+      if (loopMode) return;
+      loopSelectMode = true;
+      loopSelectStep = 1;
+      _loopStartIdx = -1;
+      _loopEndIdx = -1;
+      _startMarkerEl = null;
+      _endMarkerEl = null;
+      // 기존 마커 제거
+      document.querySelectorAll('.loop-marker').forEach(el => el.remove());
+      chars.forEach(c => c.el.classList.remove('ch-loop-range'));
+      document.getElementById('text-display').classList.add('loop-select-mode');
+      updateLoopSelectUI();
+    }
+
+    function cancelLoopSelect() {
+      loopSelectMode = false;
+      loopSelectStep = 0;
+      _loopStartIdx = -1;
+      _loopEndIdx = -1;
+      _startMarkerEl = null;
+      _endMarkerEl = null;
+      _loopDragging = null;
+      document.body.style.cursor = '';
+      setLoopDragHover(-1);
+      document.querySelectorAll('.loop-marker').forEach(el => el.remove());
+      chars.forEach(c => c.el.classList.remove('ch-loop-range'));
+      document.getElementById('text-display').classList.remove('loop-select-mode');
+      document.getElementById('loop-count-panel').style.display = 'none';
+      updateLoopSelectUI();
+    }
+
+    // text-display 클릭 → 구간 선택
+    document.getElementById('text-display').addEventListener('click', e => {
+      if (!loopSelectMode || loopSelectStep === 3) return;
+      let target = e.target;
+      while (target && target !== e.currentTarget && !target.classList.contains('ch'))
+        target = target.parentElement;
+      if (!target || !target.classList.contains('ch')) return;
+
+      const idx = chars.findIndex(c => c.el === target);
+      if (idx === -1) return;
+
+      if (loopSelectStep === 1) {
+        _loopStartIdx = idx;
+        loopSelectStep = 2;
+        placeLoopMarker('start', idx);
+        updateLoopSelectUI();
+      } else if (loopSelectStep === 2) {
+        if (idx <= _loopStartIdx) {
+          // 시작점 이전을 클릭 → 시작점 이동
+          _loopStartIdx = idx;
+          document.querySelectorAll('.loop-marker-start').forEach(el => el.remove());
+          placeLoopMarker('start', idx);
+          updateLoopRangeHighlight();
+          return;
+        }
+        _loopEndIdx = idx;
+        loopSelectStep = 3;
+        placeLoopMarker('end', idx);
+        updateLoopRangeHighlight();
+        updateLoopSelectUI();
+        // 반복 횟수 패널 표시
+        document.getElementById('loop-count-slider').value = 5;
+        updateLoopSlider(5);
+        document.getElementById('loop-count-panel').style.display = '';
+      }
+    });
+
+    // 드래그 중 hover 하이라이트
+    function setLoopDragHover(idx) {
+      if (_loopDragHoverIdx === idx) return;
+      if (_loopDragHoverIdx !== -1 && _loopDragHoverIdx < chars.length)
+        chars[_loopDragHoverIdx].el.classList.remove('ch-loop-drag-hover');
+      _loopDragHoverIdx = idx;
+      if (idx !== -1 && idx < chars.length)
+        chars[idx].el.classList.add('ch-loop-drag-hover');
+    }
+
+    // marker를 일시적으로 숨기고 그 뒤 char를 elementFromPoint로 탐색
+    function charUnderMarker(marker, clientX, clientY) {
+      marker.style.visibility = 'hidden';
+      let el = document.elementFromPoint(clientX, clientY);
+      marker.style.visibility = '';
+      while (el && !el.classList.contains('ch')) el = el.parentElement;
+      return el || null;
+    }
+
+    function placeLoopMarker(type, idx) {
+      const isStart = type === 'start';
+      const marker = document.createElement('span');
+      marker.className = `loop-marker loop-marker-${type}`;
+      marker.textContent = isStart ? '「' : '」';
+
+      // ── setPointerCapture 방식으로 드래그 구현 ───────────────────────────
+      // pointerdown → setPointerCapture → 이후 pointermove/pointerup이
+      // 포인터가 어디로 이동해도 이 marker 요소에 직접 전달됨
+      marker.addEventListener('pointerdown', e => {
+        if (!loopSelectMode || loopSelectStep !== 3) return;
+        e.preventDefault();
+        _loopDragging = type;
+        marker.setPointerCapture(e.pointerId);
+        document.body.style.cursor = 'grabbing';
+      });
+
+      marker.addEventListener('pointermove', e => {
+        if (_loopDragging !== type) return;
+        const ch = charUnderMarker(marker, e.clientX, e.clientY);
+        if (ch) {
+          const i = chars.findIndex(c => c.el === ch);
+          if (i !== -1) setLoopDragHover(i);
+        } else {
+          setLoopDragHover(-1);
+        }
+      });
+
+      const finishDrag = e => {
+        if (_loopDragging !== type) return;
+        _loopDragging = null;
+        document.body.style.cursor = '';
+        setLoopDragHover(-1);
+
+        const ch = charUnderMarker(marker, e.clientX, e.clientY);
+        let target = ch;
+        if (!target) return;
+        const idx2 = chars.findIndex(c => c.el === target);
+        if (idx2 === -1) return;
+
+        if (type === 'start') {
+          if (_loopEndIdx !== -1 && idx2 >= _loopEndIdx) return;
+          _loopStartIdx = idx2;
+          document.querySelectorAll('.loop-marker-start').forEach(el => el.remove());
+          placeLoopMarker('start', idx2);
+        } else {
+          if (idx2 <= _loopStartIdx) return;
+          _loopEndIdx = idx2;
+          document.querySelectorAll('.loop-marker-end').forEach(el => el.remove());
+          placeLoopMarker('end', idx2);
+        }
+        updateLoopRangeHighlight();
+      };
+
+      marker.addEventListener('pointerup', finishDrag);
+      marker.addEventListener('pointercancel', () => {
+        if (_loopDragging !== type) return;
+        _loopDragging = null;
+        document.body.style.cursor = '';
+        setLoopDragHover(-1);
+      });
+
+      const el = chars[idx].el;
+      if (isStart) {
+        el.parentElement.insertBefore(marker, el);
+        _startMarkerEl = marker;
+      } else {
+        el.parentElement.insertBefore(marker, el.nextSibling);
+        _endMarkerEl = marker;
+      }
+    }
+
+    function updateLoopRangeHighlight() {
+      chars.forEach((c, i) => {
+        if (_loopStartIdx !== -1 && _loopEndIdx !== -1 && i >= _loopStartIdx && i <= _loopEndIdx)
+          c.el.classList.add('ch-loop-range');
+        else
+          c.el.classList.remove('ch-loop-range');
+      });
+    }
+
+    function updateLoopSelectUI() {
+      const selectBtn = document.getElementById('loop-select-btn');
+      const hint = document.getElementById('loop-select-hint');
+      const roundInfo = document.getElementById('loop-round-info');
+      const exitBtn = document.getElementById('loop-exit-btn');
+
+      if (loopMode) {
+        selectBtn.style.display = 'none';
+        hint.style.display = 'none';
+        const total = _loopCount === 0 ? '∞' : String(_loopCount);
+        roundInfo.textContent = `${_loopRound} / ${total}`;
+        roundInfo.style.display = '';
+        exitBtn.style.display = '';
+        return;
+      }
+      roundInfo.style.display = 'none';
+      exitBtn.style.display = 'none';
+      if (!loopSelectMode) {
+        selectBtn.style.display = '';
+        hint.style.display = 'none';
+        return;
+      }
+      selectBtn.style.display = 'none';
+      hint.style.display = '';
+      hint.textContent = loopSelectStep === 1 ? '「 시작 위치 클릭' : loopSelectStep === 2 ? '」 끝 위치 클릭' : '';
+    }
+
+    function updateLoopSlider(val) {
+      val = parseInt(val);
+      _loopCount = val >= 21 ? 0 : val;
+      document.getElementById('loop-count-display').textContent = val >= 21 ? '∞' : String(val);
+    }
+
+    function startLoopMode() {
+      if (_loopStartIdx === -1 || _loopEndIdx === -1) return;
+      document.getElementById('loop-count-panel').style.display = 'none';
+      // 마커·하이라이트 제거
+      document.querySelectorAll('.loop-marker').forEach(el => el.remove());
+      chars.forEach(c => c.el.classList.remove('ch-loop-range'));
+      document.getElementById('text-display').classList.remove('loop-select-mode');
+      loopSelectMode = false;
+      loopSelectStep = 0;
+
+      _loopFullText = originalText;
+      _loopText = chars.slice(_loopStartIdx, _loopEndIdx + 1).map(c => c.char).join('');
+
+      loopMode = true;
+      _loopRound = 1;
+      updateLoopSelectUI();
+      initTyping(_loopText);
+      refocus();
+    }
+
+    function exitLoopMode() {
+      loopMode = false;
+      updateLoopSelectUI();
+      // 전체 텍스트 타이핑으로 복귀
+      initTyping(_loopFullText);
+      refocus();
+    }
 
     // ─── Init ─────────────────────────────────────────────────────────────────────
     showScreen('s-input');
