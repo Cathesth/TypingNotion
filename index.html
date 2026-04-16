@@ -33,9 +33,16 @@
       font-size: 1.2rem;
       line-height: 2.6;
       word-break: break-word;
-      white-space: pre-wrap;
       user-select: none;
       -webkit-user-select: none;
+      contain: layout;
+    }
+
+    /* 라인 단위 렌더링 컨테이너 — content-visibility로 화면 밖 라인 렌더링 생략 */
+    .tl {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 3.12rem; /* 1.2rem × line-height 2.6 */
+      word-break: break-word;
     }
 
     .ch {
@@ -134,7 +141,7 @@
 
     /* ── Newline indicator ─────────────────────────────────────────────── */
     .ch-nl {
-      font-size: .68em;
+      font-size: .5em;
       opacity: .28;
       vertical-align: baseline;
     }
@@ -264,6 +271,88 @@
     .dark .ch-loop-drag-hover {
       outline-color: rgba(129, 140, 248, .6);
     }
+
+    /* ── TOC sidebar ──────────────────────────────────────────────────── */
+    #typing-main.toc-open {
+      padding-right: 220px;
+    }
+    /* 커스텀 스크롤바 — 사이트 톤앤매너 (인디고, 얇게) */
+    #toc-panel {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(99, 102, 241, .18) transparent;
+    }
+    #toc-panel::-webkit-scrollbar { width: 3px; }
+    #toc-panel::-webkit-scrollbar-track { background: transparent; }
+    #toc-panel::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, .18);
+      border-radius: 2px;
+    }
+    #toc-panel::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, .38); }
+    .dark #toc-panel::-webkit-scrollbar-thumb { background: rgba(129, 140, 248, .2); }
+    .dark #toc-panel::-webkit-scrollbar-thumb:hover { background: rgba(129, 140, 248, .42); }
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      width: 100%;
+      text-align: left;
+      padding: 2px 5px 2px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .toc-item:hover { background: rgba(99, 102, 241, .06); }
+    .dark .toc-item:hover { background: rgba(129, 140, 248, .08); }
+    .toc-toggle-btn {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      font-size: 13px;
+      border-radius: 4px;
+      color: #d4d4d8;
+      cursor: pointer;
+      transition: background .1s, color .1s;
+    }
+    .dark .toc-toggle-btn { color: #3f3f46; }
+    .toc-toggle-btn:hover { background: rgba(99, 102, 241, .1); color: #6366f1; }
+    .dark .toc-toggle-btn:hover { background: rgba(129, 140, 248, .1); color: #818cf8; }
+    .toc-item-text {
+      flex: 1;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 12px;
+      color: #a1a1aa;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      line-height: 1.55;
+      transition: color .1s;
+    }
+    .dark .toc-item-text { color: #52525b; }
+    .toc-item:hover .toc-item-text { color: #52525b; }
+    .dark .toc-item:hover .toc-item-text { color: #a1a1aa; }
+    .toc-item.toc-active .toc-item-text { color: #6366f1; font-weight: 600; }
+    .dark .toc-item.toc-active .toc-item-text { color: #818cf8; }
+    .toc-start-btn {
+      display: none;
+      flex-shrink: 0;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #6366f1;
+      background: rgba(99, 102, 241, .1);
+      line-height: 1.6;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .dark .toc-start-btn { color: #818cf8; background: rgba(129, 140, 248, .12); }
+    .toc-start-btn:hover { background: rgba(99, 102, 241, .2); }
+    .dark .toc-start-btn:hover { background: rgba(129, 140, 248, .22); }
+    .toc-item:hover .toc-start-btn { display: block; }
   </style>
 </head>
 
@@ -277,7 +366,7 @@
 
       <div class="flex items-center justify-between mb-2">
         <div>
-          <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion</h1>
+          <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.0</span></h1>
           <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
             If you find this useful, please
             <a href="https://github.com/Cathesth/TypingNotion" target="_blank" rel="noopener"
@@ -465,6 +554,9 @@
         <!-- 루프 중 표시 -->
         <span id="loop-round-info" style="display:none"
               class="font-mono text-xs font-semibold text-indigo-500 dark:text-indigo-400 whitespace-nowrap tabular-nums"></span>
+        <button id="loop-edit-btn" style="display:none" onclick="editLoopRange()"
+               class="font-mono text-[10px] text-zinc-400 hover:text-indigo-500
+               dark:hover:text-indigo-400 transition-colors whitespace-nowrap">범위 수정</button>
         <button id="loop-exit-btn" style="display:none" onclick="exitLoopMode()"
                class="font-mono text-[10px] text-zinc-400 hover:text-red-500
                dark:hover:text-red-400 transition-colors whitespace-nowrap">구간반복 끝내기</button>
@@ -472,7 +564,8 @@
         <span class="mr-auto"></span>
 
         <div class="flex items-center gap-1.5">
-          <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">진행</span>
+          <span id="st-pos"
+            class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 tabular-nums whitespace-nowrap"></span>
           <span id="st-prog"
             class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-11 text-right tabular-nums">0%</span>
         </div>
@@ -486,6 +579,18 @@
           <span id="st-err"
             class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-6 text-right tabular-nums">0</span>
         </div>
+
+        <!-- TOC toggle -->
+        <button id="toc-toggle-btn" style="display:none" onclick="toggleToc(!_tocOpen)"
+                class="w-7 h-7 flex items-center justify-center rounded
+                       font-mono text-[10px] font-semibold
+                       text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400
+                       hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" title="목차">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/>
+          </svg>
+        </button>
 
         <!-- Settings toggle -->
         <button onclick="toggleSettings(event)" class="w-7 h-7 flex items-center justify-center rounded
@@ -538,11 +643,32 @@
     </div>
 
     <!-- Text display -->
-    <main class="pt-24 pb-[55vh]">
+    <main id="typing-main" class="pt-24 pb-[55vh]">
       <div class="max-w-[700px] mx-auto px-8">
+        <!-- 페이지 제목 (타이핑 불가, 노션 제목 표시용) -->
+        <div id="typing-title" style="display:none" class="mb-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/70">
+          <p id="typing-title-text" class="font-semibold text-2xl text-zinc-300 dark:text-zinc-600 select-none tracking-tight leading-snug"></p>
+        </div>
         <div id="text-display"></div>
       </div>
     </main>
+
+    <!-- TOC sidebar -->
+    <aside id="toc-panel" style="display:none"
+           class="fixed top-11 right-0 bottom-0 w-52 z-10 overflow-y-auto
+                  bg-white/95 dark:bg-zinc-950/95
+                  border-l border-zinc-100 dark:border-zinc-800
+                  backdrop-blur-sm">
+      <div class="sticky top-0 flex items-center justify-between px-3 py-2.5
+                  bg-white/95 dark:bg-zinc-950/95
+                  border-b border-zinc-100 dark:border-zinc-800">
+        <span class="font-mono text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">목차</span>
+        <button onclick="toggleToc(false)"
+                class="font-mono text-xs text-zinc-300 dark:text-zinc-600
+                       hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors leading-none">✕</button>
+      </div>
+      <div id="toc-list" class="py-1.5 px-0"></div>
+    </aside>
 
     <!-- Hidden IME input -->
     <input id="hidden-inp" type="text" tabindex="-1" autocomplete="off" autocorrect="off" autocapitalize="off"
@@ -556,7 +682,10 @@
 ══════════════════════════════════════════════ -->
   <div id="s-results" style="display:none" class="min-h-screen flex flex-col items-center justify-center px-6 py-16">
     <div class="w-full max-w-sm">
-      <h2 class="font-mono text-2xl font-bold text-zinc-800 dark:text-zinc-200 mb-9">완료</h2>
+      <h2 class="font-mono text-2xl font-bold text-zinc-800 dark:text-zinc-200 mb-2">완료</h2>
+      <p id="r-loop-info" style="display:none"
+         class="font-mono text-xs text-indigo-400 dark:text-indigo-500 mb-7"></p>
+      <div id="r-loop-info-spacer" class="mb-7"></div>
       <div class="grid grid-cols-2 gap-3 mb-6">
         <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
           <p class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">시간</p>
@@ -611,6 +740,32 @@
         <button onclick="mdModalConfirm()" class="px-3.5 py-1.5 font-mono text-xs font-medium rounded-lg
                bg-indigo-500 hover:bg-indigo-600 text-white transition-colors">
           제거하고 시작
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+     BACK CONFIRM MODAL
+══════════════════════════════════════════════ -->
+  <div id="back-modal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div onclick="backModalCancel()" class="absolute inset-0 bg-black/20 dark:bg-black/40"></div>
+    <div class="modal-box relative bg-white dark:bg-zinc-900 rounded-2xl shadow-xl
+                border border-zinc-100 dark:border-zinc-800 p-5 w-full max-w-[272px]">
+      <p class="font-mono text-sm font-semibold text-zinc-800 dark:text-zinc-100 mb-1.5">처음으로 돌아가기</p>
+      <p class="font-mono text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed mb-5">
+        진행 중인 타이핑이 초기화됩니다.
+      </p>
+      <div class="flex gap-2 justify-end">
+        <button onclick="backModalCancel()" class="px-3.5 py-1.5 font-mono text-xs rounded-lg
+               text-zinc-500 dark:text-zinc-400
+               hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+          계속 타이핑
+        </button>
+        <button onclick="backModalConfirm()" class="px-3.5 py-1.5 font-mono text-xs font-medium rounded-lg
+               bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900
+               hover:bg-zinc-600 dark:hover:bg-zinc-300 transition-colors">
+          처음으로
         </button>
       </div>
     </div>
@@ -790,16 +945,18 @@
     }
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && document.getElementById('md-modal').style.display !== 'none') mdModalCancel();
+      if (e.key === 'Escape' && document.getElementById('back-modal').style.display !== 'none') backModalCancel();
     });
 
     async function onStartFromText() {
       const raw = sourceTA.value.trim();
       if (!raw) return;
       if (hasMarkdown(raw)) {
-        if (await showMdModal()) startGame(cleanMarkdown(raw));
-        else startGame(raw);
+        const parsed = parseWithHeadings(raw);
+        if (await showMdModal()) startGame(parsed.text, parsed.headings, parsed.title || '');
+        else startGame(raw, [], '');
       } else {
-        startGame(raw);
+        startGame(raw, []);
       }
     }
 
@@ -820,28 +977,24 @@
 
       try {
         setFetchStatus('loading', 'Jina Reader로 페이지 변환 중…');
-        const text = await fetchViaJinaReader(url, fetchAbort.signal);
+        const { text: fetchedText, headings: fetchedHeadings, title: fetchedTitle } = await fetchViaJinaReader(url, fetchAbort.signal);
+        _pendingHeadings = fetchedHeadings;
+        _pendingTitle = fetchedTitle;
 
-        if (!text || !text.trim()) {
+        if (!fetchedText || !fetchedText.trim()) {
           throw new Error('텍스트를 추출할 수 없습니다.\n직접 입력 탭에 텍스트를 붙여넣어 주세요.');
         }
 
-        // 첫 번째 줄을 노션 페이지 제목으로 분리
-        const allLines = text.split('\n');
-        const titleLine = allLines[0]?.trim() || '';
-        const bodyText = allLines.slice(1).join('\n').replace(/^\n+/, '').trim();
-
         const titleWrap = document.getElementById('notion-title-wrap');
-        if (titleLine && bodyText) {
-          document.getElementById('notion-title-text').textContent = titleLine;
+        if (fetchedTitle) {
+          document.getElementById('notion-title-text').textContent = fetchedTitle;
           titleWrap.style.display = '';
-          document.getElementById('preview-ta').value = bodyText;
         } else {
           titleWrap.style.display = 'none';
-          document.getElementById('preview-ta').value = text;
         }
+        document.getElementById('preview-ta').value = fetchedText;
         document.getElementById('preview-wrap').style.display = '';
-        const cnt = (bodyText || text).split('\n').filter(l => l.trim()).length;
+        const cnt = fetchedText.split('\n').filter(l => l.trim()).length;
         setFetchStatus('ok', `✓ ${cnt}개 단락 추출됨`);
       } catch (e) {
         if (e.name === 'AbortError') return;
@@ -854,21 +1007,113 @@
     // Jina Reader: JS 렌더링된 페이지(Notion 등)를 텍스트로 변환
     // r.jina.ai는 서버사이드 렌더러 + CORS 헤더 포함 → file:// 환경에서도 동작
     async function fetchViaJinaReader(url, signal) {
-      const jinaUrl = `https://r.jina.ai/${url}`;
-      const res = await timedFetch(jinaUrl, 40000, signal, {
-        headers: {
-          'Accept': 'text/plain',
-          'X-Return-Format': 'text'
-        }
+      const base = `https://r.jina.ai/${url}`;
+      // text(본문) 먼저, markdown(헤딩) 순차 요청
+      const txtRes = await timedFetch(base, 60000, signal, { headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text', 'X-No-Cache': 'true', 'X-Timeout': '30' } });
+      if (!txtRes?.ok) throw new Error(`Jina Reader 오류: ${txtRes?.status}`);
+      const txtRaw = await txtRes.text();
+
+      const mdRes = await timedFetch(base, 40000, signal, { headers: { 'Accept': 'text/plain', 'X-Return-Format': 'markdown' } });
+      if (!mdRes?.ok) throw new Error(`Jina Reader 오류: ${mdRes?.status}`);
+      const mdRaw = await mdRes.text();
+
+      return combineJinaFormats(mdRaw, txtRaw);
+    }
+
+    // markdown에서 헤딩·제목, text에서 깨끗한 본문 → 합성
+    function combineJinaFormats(mdRaw, txtRaw) {
+      // ─── 1. markdown → 제목·헤딩 목록 추출 ──────────────────────────
+      const titleMatch = mdRaw.match(/^Title:\s+(.+)/m);
+      const pageTitle = titleMatch ? titleMatch[1].trim() : '';
+
+      const headings = [];
+      for (const line of mdRaw.split('\n')) {
+        const m = line.match(/^(#{1,6})[ \t]+(.+)/);
+        if (!m) continue;
+        const headingText = m[2].replace(/\*\*/g, '').replace(/~~[^~]+~~/g, '').trim();
+        if (!headingText || /^~~.*~~$/.test(m[2].trim())) continue;
+        // 페이지 제목과 동일한 첫 번째 헤딩은 목차에서 제외
+        if (headings.length === 0 && headingText === pageTitle) continue;
+        headings.push({ level: m[1].length, text: headingText, charIndex: -1 });
+      }
+
+      // ─── 2. text 포맷 → 본문 정제 ────────────────────────────────────
+      // Jina 헤더 블록 제거
+      let body = txtRaw;
+      const mcMatch = body.match(/(?:^|\n)((?:Markdown Content|Markdownified Content|Text Content):)\s*\n/i);
+      if (mcMatch) {
+        const idx = body.indexOf(mcMatch[1]);
+        const after = body.indexOf('\n', idx);
+        if (after !== -1) body = body.slice(after + 1);
+      }
+
+      // 1차: 라인별 필터 (cleanJinaOutput step1과 동일 기준)
+      const step1 = [];
+      for (const line of body.split('\n')) {
+        const t = line.trim();
+        if (!t) continue;
+        if (/^https?:\/\//i.test(t)) continue;
+        if (/^\[.*\]\(https?:\/\//i.test(t)) continue;
+        if (/^[=\-*_]{3,}$/.test(t)) continue;
+        if (/^!\[/i.test(t)) continue;
+        if (/^\d+\s*(s|m|h|d|w|mo|yr)s?(\s*\(.*\))?$/i.test(t)) continue;
+        if (/^(just now|yesterday|today)$/i.test(t)) continue;
+        if (/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(,?\s+\d{2,4})?(\s+\(.*\))?$/i.test(t)) continue;
+        if (/^\(edited\)$|^\(수정됨\)$/i.test(t)) continue;
+        if (/^(last edited|created by|edited by|updated by|written by)\b/i.test(t)) continue;
+        if (/^(title|url source|url|source|published time?|author|description|markdown content|markdownified content|text content):\s*/i.test(t)) continue;
+        if (/^(skip to content|get notion free|sign up|log in|log out|sign in|try for free)$/i.test(t)) continue;
+        if (/^([….]{1,3}\s*more|see more|show more|load more|view more)$/i.test(t)) continue;
+        if (/^>+\s*/.test(t)) { const inner = t.replace(/^>+\s*/, '').trim(); if (inner) step1.push(inner); continue; }
+        if (/^[-+]\s+/.test(t)) { step1.push(t.replace(/^[-+]\s+/, '')); continue; }
+        if (/^\d+\.\s+/.test(t)) { step1.push(t.replace(/^\d+\.\s+/, '')); continue; }
+        step1.push(t);
+      }
+
+      // 2차: 반복 출현 메타데이터 제거 (헤딩 보호)
+      const headingTextSet = new Set(headings.map(h => h.text));
+      const freq = new Map();
+      for (const line of step1) freq.set(line, (freq.get(line) || 0) + 1);
+      const step2 = step1.filter(line => {
+        const cnt = freq.get(line);
+        if (cnt < 2) return true;
+        if (headingTextSet.has(line)) return true;
+        if (line.length >= 30) return true;
+        if (/[\uAC00-\uD7A3\u3130-\u318F]/.test(line)) return true;
+        return false;
       });
-      if (!res || !res.ok) throw new Error(`Jina Reader 오류: ${res?.status}`);
-      const raw = await res.text();
-      return cleanJinaOutput(raw);
+
+      // 3차: 연속 중복 제거
+      const result = [];
+      let prev = null;
+      for (const line of step2) {
+        if (line !== prev) result.push(line);
+        prev = line;
+      }
+
+      let bodyText = result.join('\n').trim();
+      // 페이지 제목이 본문 첫 줄에 중복될 경우 제거
+      if (pageTitle && bodyText.split('\n')[0]?.trim() === pageTitle) {
+        bodyText = bodyText.slice(bodyText.indexOf('\n') + 1).replace(/^\n+/, '').trim();
+      }
+      return { title: pageTitle, headings, text: bodyText };
     }
 
     // Jina Reader 출력 정제 (네비게이션/URL/Notion 메타데이터 제거, 타이핑용 클린 텍스트)
+    // 헤딩 구조도 함께 추출해 { text, headings } 반환
     function cleanJinaOutput(raw) {
+      // ─── 전처리: Jina markdown 응답 헤더 블록에서 제목 추출 후 제거 ──────────
+      const titleMatch = raw.match(/^Title:\s+(.+)/m);
+      const pageTitle = titleMatch ? titleMatch[1].trim() : '';
+
+      const mcMatch = raw.match(/(?:^|\n)(Markdown Content:|Markdownified Content:)\s*\n/);
+      if (mcMatch) {
+        const afterIdx = raw.indexOf('\n', raw.indexOf(mcMatch[1]));
+        raw = afterIdx !== -1 ? raw.slice(afterIdx + 1) : raw;
+      }
+
       const lines = raw.split('\n');
+      const headings = []; // { level, text } — charIndex는 resolveHeadingPositions에서 채움
 
       // ─── 1차: 라인별 명시적 필터 ───────────────────────────────────────────
       const step1 = [];
@@ -879,7 +1124,7 @@
         if (/^https?:\/\//i.test(t)) continue;
         // 마크다운 링크 (단독 라인)
         if (/^\[.*\]\(https?:\/\//i.test(t)) continue;
-        // 구분선 (--- ===)
+        // 구분선 (--- === ___ ***)
         if (/^[=\-*_]{3,}$/.test(t)) continue;
         // 마크다운 이미지
         if (/^!\[/i.test(t)) continue;
@@ -887,35 +1132,56 @@
         if (/^\d+\s*(s|m|h|d|w|mo|yr)s?(\s*\(.*\))?$/i.test(t)) continue;
         // "just now", "yesterday", "today"
         if (/^(just now|yesterday|today)$/i.test(t)) continue;
+        // 절대 날짜: "Apr 13", "April 13, 2024", "Jan 5 (edited)" 등
+        if (/^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(,?\s+\d{2,4})?(\s+\(.*\))?$/i.test(t)) continue;
+        // "(edited)", "(수정됨)" 등 단독 라인
+        if (/^\(edited\)$|^\(수정됨\)$/i.test(t)) continue;
         // "Last edited by" "Created by" 등
         if (/^(last edited|created by|edited by|updated by|written by)\b/i.test(t)) continue;
-        // Jina Reader 헤더 메타라인: "Title: ..." "URL: ..." "Published Time: ..."
-        if (/^(title|url|source|published time?|author|description):\s/i.test(t)) continue;
+        // Jina Reader 헤더 메타라인: "Title:", "URL Source:", "Published Time:", "Markdown Content:" 등
+        if (/^(title|url source|url|source|published time?|author|description|markdown content|markdownified content):\s*/i.test(t)) continue;
         // Notion/웹사이트 네비게이션 UI 문구
         if (/^(skip to content|get notion free|sign up|log in|log out|sign in|try for free)$/i.test(t)) continue;
         // "… more", "... more", "see more", "show more", "load more"
         if (/^([….]{1,3}\s*more|see more|show more|load more|view more)$/i.test(t)) continue;
-        // 마크다운 헤딩 → 헤딩 기호만 제거, 텍스트 보관
-        if (/^#+\s/.test(t)) { step1.push(t.replace(/^#+\s+/, '')); continue; }
+        // 블록쿼트: "> text" → 꺽쇠 제거, 텍스트 보관
+        if (/^>+\s*/.test(t)) { const inner = t.replace(/^>+\s*/, '').trim(); if (inner) step1.push(inner); continue; }
+        // 마크다운 리스트 항목: "- item", "* item", "+ item", "1. item" → 기호 제거
+        if (/^[-+]\s+/.test(t)) { step1.push(t.replace(/^[-+]\s+/, '')); continue; }
+        if (/^\d+\.\s+/.test(t)) { step1.push(t.replace(/^\d+\.\s+/, '')); continue; }
+        // 마크다운 헤딩 → 헤딩 기호 제거 + 헤딩 메타 기록
+        if (/^#+\s/.test(t)) {
+          const m = t.match(/^(#{1,6})\s+(.+)/);
+          if (m) {
+            let headingText = m[2].replace(/\*\*/g, '').replace(/~~[^~]+~~/g, '').trim();
+            // 취소선으로 완전히 지워진 헤딩(또는 빈 헤딩)은 타이핑 본문에서도 제외
+            if (!headingText || /^~~.*~~$/.test(m[2].trim())) continue;
+            // 페이지 제목과 동일한 첫 번째 헤딩은 목차에서 제외
+            if (headings.length === 0 && headingText === pageTitle) { step1.push(headingText); continue; }
+            headings.push({ level: m[1].length, text: headingText, charIndex: -1 });
+            step1.push(headingText);
+          }
+          continue;
+        }
         step1.push(t);
       }
 
       // ─── 2차: 반복 출현 메타데이터 제거 ────────────────────────────────────
-      // 노션 댓글/반응 UI에는 "작성자명\n시간" 패턴이 반복됨.
-      // 짧고(< 30자), 한글 없이, 2회 이상 등장하는 라인을 메타로 판정해 제거.
+      // 헤딩 텍스트는 중복 출현해도 반드시 보존 (네비게이션 중복 필터에서 제외)
+      const headingTextSet = new Set(headings.map(h => h.text));
       const freq = new Map();
       for (const line of step1) freq.set(line, (freq.get(line) || 0) + 1);
 
       const step2 = step1.filter(line => {
         const cnt = freq.get(line);
-        if (cnt < 2) return true;               // 1회만 나오면 본문일 가능성 높음
-        if (line.length >= 30) return true;     // 충분히 긴 줄은 본문
-        if (/[\uAC00-\uD7A3\u3130-\u318F]/.test(line)) return true; // 한글 포함 시 본문
-        // 짧고, 비한글, 반복 → Notion UI 메타데이터로 판정
+        if (cnt < 2) return true;
+        if (headingTextSet.has(line)) return true;  // 헤딩은 항상 보존
+        if (line.length >= 30) return true;
+        if (/[\uAC00-\uD7A3\u3130-\u318F]/.test(line)) return true;
         return false;
       });
 
-      // ─── 3차: 연속 중복 라인 제거 (혹시 남은 중복) ─────────────────────────
+      // ─── 3차: 연속 중복 라인 제거 ───────────────────────────────────────────
       const result = [];
       let prev = null;
       for (const line of step2) {
@@ -923,7 +1189,27 @@
         prev = line;
       }
 
-      return result.join('\n').replace(/\*\*/g, '');
+      let cleanedText = result.join('\n')
+          .replace(/([가-힣])\s+(<[^>]+>)/g, '$1$2')
+          .replace(/<[^>]+>/g, '')
+          .replace(/([가-힣])\s(==[^=\n]+==)/g, '$1$2')
+          .replace(/==([^=\n]+)==/g, '$1')
+          .replace(/([가-힣])\s(\*\*[^*\n]+\*\*)/g, '$1$2')
+          .replace(/([가-힣])\s(\*[^*\n]+\*)/g, '$1$2')
+          .replace(/([가-힣])\s(__[^_\n]+__)/g, '$1$2')
+          .replace(/([가-힣])\s(_[^_\n]+_)/g, '$1$2')
+          .replace(/\*\*/g, '')
+          .replace(/\*([^*\n]+)\*/g, '$1')
+          .replace(/__([^_\n]+)__/g, '$1')
+          .replace(/_([^_\n]+)_/g, '$1')
+          .replace(/~~[^~\n]+~~/g, '')
+          .replace(/`([^`\n]+)`/g, '$1')
+          .trim();
+      // 페이지 제목이 본문 첫 줄에 중복될 경우 제거
+      if (pageTitle && cleanedText.split('\n')[0]?.trim() === pageTitle) {
+        cleanedText = cleanedText.slice(cleanedText.indexOf('\n') + 1).replace(/^\n+/, '').trim();
+      }
+      return { title: pageTitle, headings, text: cleanedText };
     }
 
 
@@ -1159,14 +1445,31 @@
     // ─── Start game ───────────────────────────────────────────────────────────────
     function onStartFromPreview() {
       const t = document.getElementById('preview-ta').value.trim();
-      if (t) startGame(t);
+      if (t) startGame(t, _pendingHeadings, _pendingTitle);
     }
-    function startGame(text) {
+    function startGame(text, headings = [], title = '') {
       originalText = text;
+      _pageTitle = title;
+      _headings = headings.map(h => ({ level: h.level, text: h.text, charIndex: -1 }));
+      _tocOpen = true;
+      // 페이지 제목 표시
+      const titleWrap = document.getElementById('typing-title');
+      const titleText = document.getElementById('typing-title-text');
+      if (title) { titleText.textContent = title; titleWrap.style.display = ''; }
+      else { titleWrap.style.display = 'none'; }
       initTyping(text);
+      resolveHeadingPositions();
+      buildToc();
       showScreen('s-typing');
       refocus();
     }
+
+    // ─── TOC state ────────────────────────────────────────────────────────────────
+    let _headings = [];        // 현재 세션 헤딩 [{level, text, charIndex}]
+    let _pendingHeadings = []; // URL fetch 후 대기 중인 헤딩
+    let _pendingTitle = '';    // URL fetch 후 대기 중인 페이지 제목
+    let _pageTitle = '';       // 현재 세션 페이지 제목
+    let _tocOpen = true;
 
     // ─── Typing state ─────────────────────────────────────────────────────────────
     let originalText = '';
@@ -1179,6 +1482,8 @@
     let isComposing = false;
     let justComposed = false;
     let spaceQueued = false; // 한글 조합 중/직후 스페이스 누름 대기
+    let _lastKeyWasBackspace = false; // 자모 오타 백스페이스 잔류 버그 방지
+    let _skipGroupCounter = 0; // skipChunk 그룹 ID (백스페이스 한 번에 전체 취소용)
     let errorLog = [];
 
     const display = document.getElementById('text-display');
@@ -1189,20 +1494,35 @@
       chars = []; cursorIdx = 0; errorCount = 0; startTime = null;
       totalTyped = 0; correctTyped = 0; errorLog = [];
       isComposing = false; justComposed = false; spaceQueued = false;
+      _lastKeyWasBackspace = false; _skipGroupCounter = 0;
       hiddenInp.value = '';
       display.innerHTML = '';
+
+      // DocumentFragment + 라인 단위 div: 일괄 DOM 삽입 + content-visibility 활성화
+      const fragment = document.createDocumentFragment();
+      let lineDiv = document.createElement('div');
+      lineDiv.className = 'tl';
 
       for (let i = 0; i < text.length; i++) {
         const ch = text[i];
         const span = document.createElement('span');
-        span.className = 'ch ch-untyped';
-        if (ch === '\n') { span.textContent = '↵'; span.classList.add('ch-nl'); }
-        else if (ch === ' ') { span.innerHTML = '&nbsp;'; }
-        else { span.textContent = ch; }
-        display.appendChild(span);
+        if (ch === '\n') {
+          span.className = 'ch ch-untyped ch-nl';
+          span.textContent = '↵';
+          lineDiv.appendChild(span);
+          fragment.appendChild(lineDiv);
+          lineDiv = document.createElement('div');
+          lineDiv.className = 'tl';
+        } else {
+          span.className = 'ch ch-untyped';
+          if (ch === ' ') span.innerHTML = '&nbsp;';
+          else span.textContent = ch;
+          lineDiv.appendChild(span);
+        }
         chars.push({ char: ch, state: 'untyped', el: span });
-        if (ch === '\n') display.appendChild(document.createElement('br'));
       }
+      if (lineDiv.hasChildNodes()) fragment.appendChild(lineDiv);
+      display.appendChild(fragment);
 
       if (chars.length) applyState(0, 'cursor');
       updateStats();
@@ -1283,10 +1603,12 @@
       if (startCh === ' ') return;
       const chunkType = getCharType(startCh);
 
+      const groupId = _skipGroupCounter;
       let cnt = 0;
       while (cursorIdx < chars.length) {
         const ch = chars[cursorIdx].char;
         if (ch === ' ' || getCharType(ch) !== chunkType) break;
+        chars[cursorIdx].skipGroup = groupId;
         restoreContent(cursorIdx);
         totalTyped++;
         // 설정상 스킵 허용 문자(또는 줄바꿈)는 skipped, 그 외는 incorrect
@@ -1304,15 +1626,18 @@
 
       if (cnt === 0) return;
 
-      // 덩어리 스킵 후 바로 이어지는 공백도 함께 스킵
+      // 덩어리 스킵 후 바로 이어지는 공백도 함께 스킵 (같은 그룹으로 묶음)
       // ex) "목록,⏵위치" → 쉬표 스킵 후 스페이스도 자동 처리
       if (cursorIdx < chars.length && chars[cursorIdx].char === ' ') {
+        chars[cursorIdx].skipGroup = groupId;
         restoreContent(cursorIdx);
         totalTyped++;
         correctTyped++;
         applyState(cursorIdx, 'skipped');
         cursorIdx++;
       }
+
+      _skipGroupCounter++;
 
       if (cursorIdx < chars.length) { applyState(cursorIdx, 'cursor'); scrollCursor(); }
       updateStats();
@@ -1333,6 +1658,36 @@
       cursorIdx--;
 
       const prev = chars[cursorIdx];
+
+      // skipGroup 청크: 스페이스바 스킵으로 한 번에 처리된 단어 → 백스페이스 한 번에 전체 취소
+      if (prev.skipGroup !== undefined) {
+        const groupId = prev.skipGroup;
+        // 그룹 시작 위치 탐색
+        let groupStart = cursorIdx;
+        while (groupStart > 0 && chars[groupStart - 1].skipGroup === groupId) groupStart--;
+        // 그룹 전체 취소
+        for (let i = groupStart; i <= cursorIdx; i++) {
+          const c = chars[i];
+          if (c.state === 'correct' || c.state === 'skipped') {
+            totalTyped = Math.max(0, totalTyped - 1);
+            correctTyped = Math.max(0, correctTyped - 1);
+          } else if (c.state === 'incorrect') {
+            totalTyped = Math.max(0, totalTyped - 1);
+            errorCount = Math.max(0, errorCount - 1);
+            for (let j = errorLog.length - 1; j >= 0; j--)
+              if (errorLog[j].index === i) { errorLog.splice(j, 1); break; }
+          }
+          restoreContent(i);
+          applyState(i, 'untyped');
+          delete c.skipGroup;
+        }
+        cursorIdx = groupStart;
+        applyState(cursorIdx, 'cursor');
+        scrollCursor();
+        updateStats();
+        return;
+      }
+
       restoreContent(cursorIdx);
 
       if (prev.state === 'correct' || prev.state === 'skipped') {
@@ -1350,19 +1705,37 @@
       updateStats();
     }
 
+    let _rafScroll = null;
     function scrollCursor() {
-      if (cursorIdx < chars.length)
-        chars[cursorIdx].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (cursorIdx >= chars.length) return;
+      // rAF 디바운스: 연속 타이핑 시 매 프레임 1회만 실행
+      if (_rafScroll !== null) cancelAnimationFrame(_rafScroll);
+      _rafScroll = requestAnimationFrame(() => {
+        _rafScroll = null;
+        if (cursorIdx >= chars.length) return;
+        const el = chars[cursorIdx].el;
+        const rect = el.getBoundingClientRect();
+        const vh = window.innerHeight;
+        // 커서가 뷰포트 20%-75% 구간에 있으면 스크롤 생략
+        if (rect.top >= vh * 0.2 && rect.bottom <= vh * 0.75) return;
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      });
     }
 
+    let _rafStats = null;
     function updateStats() {
-      const total = chars.length;
-      const progress = total > 0 ? Math.round((cursorIdx / total) * 100) : 0;
-      const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : null;
-      document.getElementById('st-prog').textContent = progress + '%';
-      document.getElementById('st-acc').textContent = accuracy !== null ? accuracy + '%' : '—';
-      document.getElementById('st-err').textContent = errorCount;
-      document.getElementById('prog-bar-fill').style.width = progress + '%';
+      if (_rafStats !== null) return; // 이미 다음 프레임 예약됨
+      _rafStats = requestAnimationFrame(() => {
+        _rafStats = null;
+        const total = chars.length;
+        const progress = total > 0 ? Math.round((cursorIdx / total) * 100) : 0;
+        const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : null;
+        document.getElementById('st-prog').textContent = progress + '%';
+        document.getElementById('st-pos').textContent = `${cursorIdx} / ${total}자`;
+        document.getElementById('st-acc').textContent = accuracy !== null ? accuracy + '%' : '—';
+        document.getElementById('st-err').textContent = errorCount;
+        document.getElementById('prog-bar-fill').style.width = progress + '%';
+      });
     }
 
     // ─── 한글 자모 판별 헬퍼 ─────────────────────────────────────────────────────
@@ -1416,15 +1789,23 @@
       if (data) {
         const expected = cursorIdx < chars.length ? chars[cursorIdx].char : '';
 
-        // 자모만 있고 음절을 기대 중: 아직 조합 미완성 (backspace 등 엣지 케이스)
+        // 자모만 있고 음절을 기대 중: 아직 조합 미완성
+        // 단, 백스페이스로 조합이 취소된 경우에는 커서만 복원 (자모 잔류 방지)
         if (isJamoOnly(data) && hasKoreanSyllable(expected)) {
-          showComposing(data);
+          if (_lastKeyWasBackspace) {
+            applyState(cursorIdx, 'cursor');
+          } else {
+            showComposing(data);
+          }
+          _lastKeyWasBackspace = false;
           setTimeout(() => { justComposed = false; spaceQueued = false; }, 50);
           return;
         }
 
+        _lastKeyWasBackspace = false;
         for (const ch of data) typeChar(ch);
       } else {
+        _lastKeyWasBackspace = false;
         applyState(cursorIdx, 'cursor');
       }
 
@@ -1453,6 +1834,9 @@
         spaceQueued = true;
         return;
       }
+
+      // 조합 중 백스페이스 여부를 compositionend에서 참조하기 위해 미리 기록
+      _lastKeyWasBackspace = (e.key === 'Backspace');
 
       if (isComposing) return;
 
@@ -1500,7 +1884,263 @@
     });
 
     function refocus() { hiddenInp.value = ''; hiddenInp.focus(); }
+
+    // ─── TOC functions ────────────────────────────────────────────────────────────
+    // 직접 입력 텍스트에서 # 헤딩 파싱 + 제거 → { text, headings }
+    function parseWithHeadings(rawText) {
+      const lines = rawText.split('\n');
+      const headings = [];
+      const outputLines = [];
+      let title = '';
+
+      // 인라인 마크다운 기호 제거 (cleanJinaOutput과 동일 수준)
+      function stripInline(s) {
+        const stripped = s
+          // HTML 인라인 태그
+          .replace(/([가-힣])\s+(<[^>]+>)/g, '$1$2')
+          .replace(/<[^>]+>/g, '')
+          // ==하이라이트==
+          .replace(/([가-힣])\s(==[^=\n]+==)/g, '$1$2')
+          .replace(/==([^=\n]+)==/g, '$1')
+          // 한글 뒤 인공 공백 + 마커 제거
+          .replace(/([가-힣])\s(\*\*[^*\n]+\*\*)/g, '$1$2')
+          .replace(/([가-힣])\s(\*[^*\n]+\*)/g, '$1$2')
+          .replace(/([가-힣])\s(__[^_\n]+__)/g, '$1$2')
+          .replace(/([가-힣])\s(_[^_\n]+_)/g, '$1$2')
+          .replace(/\*\*/g, '')
+          .replace(/\*([^*\n]+)\*/g, '$1')
+          .replace(/__([^_\n]+)__/g, '$1')
+          .replace(/_([^_\n]+)_/g, '$1')
+          .replace(/~~[^~\n]+~~/g, '')
+          .replace(/`([^`\n]+)`/g, '$1');
+        return stripped
+          .replace(/[ \t]{2,}/g, ' ')
+          .trim();
+      }
+
+      for (const line of lines) {
+        const t = line.replace(/^[ \t]+/, '').replace(/[ \t]+$/, '');
+        if (!t) continue;
+
+        // 헤딩
+        const hm = t.match(/^(#{1,6})[ \t]+(.+)/);
+        if (hm) {
+          const headingText = stripInline(hm[2]);
+          if (!headingText) continue;
+          // 첫 번째 h1을 페이지 제목으로 사용
+          if (!title && hm[1].length === 1) title = headingText;
+          headings.push({ level: hm[1].length, text: headingText, charIndex: -1 });
+          outputLines.push(headingText);
+          continue;
+        }
+        // 리스트 항목 (- item / * item / 1. item)
+        if (/^[-*+]\s+/.test(t)) { const s = stripInline(t.replace(/^[-*+]\s+/, '')); if (s) outputLines.push(s); continue; }
+        if (/^\d+\.\s+/.test(t)) { const s = stripInline(t.replace(/^\d+\.\s+/, '')); if (s) outputLines.push(s); continue; }
+        // 블록쿼트
+        if (/^>+\s*/.test(t)) { const s = stripInline(t.replace(/^>+\s*/, '')); if (s) outputLines.push(s); continue; }
+        // 일반 텍스트
+        const stripped = stripInline(t);
+        if (stripped) outputLines.push(stripped);
+      }
+      return { text: outputLines.join('\n').trim(), headings, title };
+    }
+
+    // chars[] 기준으로 각 헤딩의 charIndex 탐색 (텍스트 검색 방식 — 변환 후에도 robust)
+    function resolveHeadingPositions() {
+      for (const h of _headings) {
+        h.charIndex = -1;
+        const t = h.text;
+        if (!t) continue;
+        outer: for (let i = 0; i <= chars.length - t.length; i++) {
+          // 줄 시작 조건
+          if (i > 0 && chars[i - 1].char !== '\n') continue;
+          for (let j = 0; j < t.length; j++) {
+            if (chars[i + j].char !== t[j]) continue outer;
+          }
+          // 줄 끝 조건 (헤딩은 독립된 한 줄)
+          const end = i + t.length;
+          if (end < chars.length && chars[end].char !== '\n') continue;
+          h.charIndex = i;
+          break;
+        }
+      }
+    }
+
+    // TOC 노드 트리 상태
+    let _tocNodes = [];
+
+    // TOC 패널 DOM 빌드 (collapsible 트리 구조)
+    function buildToc() {
+      const list = document.getElementById('toc-list');
+      const panel = document.getElementById('toc-panel');
+      const btn = document.getElementById('toc-toggle-btn');
+      list.innerHTML = '';
+      _tocNodes = [];
+
+      const valid = _headings.filter(h => h.charIndex !== -1);
+      if (!valid.length) {
+        panel.style.display = 'none';
+        document.getElementById('typing-main').classList.remove('toc-open');
+        btn.style.display = 'none';
+        return;
+      }
+
+      btn.style.display = '';
+
+      // 트리 구조 빌드: 각 노드에 parentIdx, childCount 부여
+      _tocNodes = valid.map((h, i) => ({
+        level: h.level, text: h.text, charIndex: h.charIndex,
+        idx: i, parentIdx: -1, childCount: 0, collapsed: false, el: null, toggleEl: null
+      }));
+      for (let i = 1; i < _tocNodes.length; i++) {
+        for (let j = i - 1; j >= 0; j--) {
+          if (_tocNodes[j].level < _tocNodes[i].level) {
+            _tocNodes[i].parentIdx = j;
+            _tocNodes[j].childCount++;
+            break;
+          }
+        }
+      }
+
+      // DOM 빌드
+      _tocNodes.forEach(node => {
+        const item = document.createElement('div');
+        item.className = 'toc-item';
+        item.style.paddingLeft = `${(node.level - 1) * 12 + 4}px`;
+        node.el = item;
+
+        // 접기 버튼 (자식 있을 때만 실제 표시)
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'toc-toggle-btn';
+        toggleBtn.textContent = node.childCount > 0 ? '▾' : '';
+        toggleBtn.style.visibility = node.childCount > 0 ? '' : 'hidden';
+        node.toggleEl = toggleBtn;
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'toc-item-text';
+        textSpan.textContent = node.text;
+        textSpan.title = node.text;
+
+        const startBtn = document.createElement('button');
+        startBtn.className = 'toc-start-btn';
+        startBtn.textContent = '▶';
+        startBtn.title = '여기서 시작';
+
+        item.appendChild(toggleBtn);
+        item.appendChild(textSpan);
+        item.appendChild(startBtn);
+
+        item.addEventListener('click', e => {
+          if (e.target === startBtn) {
+            startFromHeading(node.charIndex);
+          } else if (e.target === toggleBtn && node.childCount > 0) {
+            node.collapsed = !node.collapsed;
+            toggleBtn.textContent = node.collapsed ? '▸' : '▾';
+            renderTocVisibility();
+          } else {
+            scrollToHeading(node.charIndex);
+          }
+        });
+
+        list.appendChild(item);
+      });
+
+      renderTocVisibility();
+
+      if (_tocOpen) {
+        panel.style.display = '';
+        document.getElementById('typing-main').classList.add('toc-open');
+      }
+    }
+
+    function isTocNodeVisible(node) {
+      let p = node.parentIdx;
+      while (p !== -1) {
+        if (_tocNodes[p].collapsed) return false;
+        p = _tocNodes[p].parentIdx;
+      }
+      return true;
+    }
+
+    function renderTocVisibility() {
+      _tocNodes.forEach(node => {
+        node.el.style.display = isTocNodeVisible(node) ? '' : 'none';
+      });
+    }
+
+    function toggleToc(open) {
+      _tocOpen = open;
+      const panel = document.getElementById('toc-panel');
+      const hasHeadings = _headings.some(h => h.charIndex !== -1);
+      if (!hasHeadings) return;
+      panel.style.display = open ? '' : 'none';
+      document.getElementById('typing-main').classList.toggle('toc-open', open);
+    }
+
+    function scrollToHeading(charIdx) {
+      if (charIdx < 0 || charIdx >= chars.length) return;
+      // content-visibility:auto 환경에서 smooth는 추정 높이로 잘못된 위치로 이동함
+      // instant로 강제 레이아웃 후 정확한 위치로 점프
+      chars[charIdx].el.scrollIntoView({ block: 'start', behavior: 'instant' });
+      window.scrollBy({ top: -64, behavior: 'instant' }); // 상단 고정 헤더 오프셋
+    }
+
+    function startFromHeading(charIdx) {
+      if (charIdx < 0 || charIdx >= chars.length) return;
+      const newText = originalText.slice(charIdx);
+      const newHeadings = _headings
+        .filter(h => h.charIndex >= charIdx)
+        .map(h => ({ level: h.level, text: h.text }));
+      startGame(newText, newHeadings, _pageTitle);
+      // content-visibility:auto 환경에서 smooth 스크롤은 추정 높이로 잘못된 위치로 이동하므로
+      // instant로 강제 레이아웃 후 정확한 위치로 점프
+      if (chars.length) {
+        chars[0].el.scrollIntoView({ block: 'start', behavior: 'instant' });
+        window.scrollBy({ top: -64, behavior: 'instant' });
+      }
+    }
+
+    function updateTocActive() {
+      if (!_tocNodes.length) return;
+      const threshold = 64;
+      const valid = _headings.filter(h => h.charIndex !== -1);
+      let bestIdx = -1;
+      for (let i = 0; i < valid.length; i++) {
+        const el = chars[valid[i].charIndex]?.el;
+        if (!el) continue;
+        if (el.getBoundingClientRect().top <= threshold) bestIdx = i;
+      }
+      // querySelectorAll 대신 캐시된 _tocNodes 사용
+      _tocNodes.forEach((node, i) => {
+        if (node.el) node.el.classList.toggle('toc-active', i === bestIdx);
+      });
+    }
+
+    let _rafToc = null;
+    window.addEventListener('scroll', () => {
+      if (document.getElementById('s-typing').style.display !== 'none') {
+        if (_rafToc !== null) cancelAnimationFrame(_rafToc);
+        _rafToc = requestAnimationFrame(() => { _rafToc = null; updateTocActive(); });
+      }
+    }, { passive: true });
+
     function onBack() {
+      // 진행 중인 세션이 있으면 확인 모달
+      if (startTime !== null && totalTyped > 0) {
+        document.getElementById('back-modal').style.display = 'flex';
+        return;
+      }
+      _doBack();
+    }
+    function backModalConfirm() {
+      document.getElementById('back-modal').style.display = 'none';
+      _doBack();
+    }
+    function backModalCancel() {
+      document.getElementById('back-modal').style.display = 'none';
+      refocus();
+    }
+    function _doBack() {
       if (loopSelectMode) cancelLoopSelect();
       if (loopMode) { loopMode = false; updateLoopSelectUI(); }
       showScreen('s-input');
@@ -1517,6 +2157,7 @@
           _loopRound++;
           updateLoopSelectUI();
           initTyping(_loopText);
+          window.scrollTo({ top: 0, behavior: 'instant' });
           return; // 타이핑 창 유지
         }
         // 모든 라운드 완료 → 루프 종료 후 결과 표시
@@ -1536,6 +2177,18 @@
       document.getElementById('r-wpm').textContent = wpm;
       document.getElementById('r-acc').textContent = accuracy + '%';
       document.getElementById('r-errs').textContent = errorCount;
+
+      const loopInfoEl = document.getElementById('r-loop-info');
+      const loopSpacerEl = document.getElementById('r-loop-info-spacer');
+      if (_wasLoopSession) {
+        loopInfoEl.textContent = `${_loopCount}회 반복 완료 · 구간 ${_loopText.length}자`;
+        loopInfoEl.style.display = '';
+        loopSpacerEl.style.display = 'none';
+      } else {
+        loopInfoEl.style.display = 'none';
+        loopSpacerEl.style.display = '';
+      }
+
       showScreen('s-results');
     }
 
@@ -1547,6 +2200,11 @@
         _loopRound = 1;
         updateLoopSelectUI();
         initTyping(_loopText);
+        // 구간반복 재시작 — TOC 숨김
+        document.getElementById('toc-panel').style.display = 'none';
+        document.getElementById('typing-main').classList.remove('toc-open');
+        document.getElementById('toc-toggle-btn').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'instant' });
         showScreen('s-typing');
         refocus();
         return;
@@ -1557,7 +2215,7 @@
       showScreen('s-typing');
       refocus();
     }
-    function onNewText() { _wasLoopSession = false; showScreen('s-input'); switchTab(lastTab); }
+    function onNewText() { _wasLoopSession = false; _pendingHeadings = []; _pendingTitle = ''; _pageTitle = ''; showScreen('s-input'); switchTab(lastTab); }
 
     // ─── Loop mode ────────────────────────────────────────────────────────────────
     let loopMode = false;
@@ -1569,6 +2227,8 @@
     let _loopCount = 5;      // 0 = ∞
     let _loopRound = 0;
     let _loopFullText = '';
+    let _loopStartIdxInFull = -1; // 전체 텍스트 기준 구간 시작 인덱스 (범위 수정용)
+    let _loopEndIdxInFull = -1;   // 전체 텍스트 기준 구간 끝 인덱스 (범위 수정용)
     let _startMarkerEl = null;  // 현재 DOM에 있는 「 마커 요소
     let _endMarkerEl = null;    // 현재 DOM에 있는 」 마커 요소
     let _loopDragging = null;   // 'start' | 'end' | null
@@ -1747,6 +2407,7 @@
       const selectBtn = document.getElementById('loop-select-btn');
       const hint = document.getElementById('loop-select-hint');
       const roundInfo = document.getElementById('loop-round-info');
+      const editBtn = document.getElementById('loop-edit-btn');
       const exitBtn = document.getElementById('loop-exit-btn');
 
       if (loopMode) {
@@ -1755,10 +2416,12 @@
         const total = _loopCount === 0 ? '∞' : String(_loopCount);
         roundInfo.textContent = `${_loopRound} / ${total}`;
         roundInfo.style.display = '';
+        editBtn.style.display = '';
         exitBtn.style.display = '';
         return;
       }
       roundInfo.style.display = 'none';
+      editBtn.style.display = 'none';
       exitBtn.style.display = 'none';
       if (!loopSelectMode) {
         selectBtn.style.display = '';
@@ -1787,20 +2450,58 @@
       loopSelectStep = 0;
 
       _loopFullText = originalText;
+      _loopStartIdxInFull = _loopStartIdx;
+      _loopEndIdxInFull = _loopEndIdx;
       _loopText = chars.slice(_loopStartIdx, _loopEndIdx + 1).map(c => c.char).join('');
 
       loopMode = true;
       _loopRound = 1;
       updateLoopSelectUI();
       initTyping(_loopText);
+      // 구간반복 중 TOC 숨김 (chars[]가 부분 텍스트라 인덱스 불일치)
+      document.getElementById('toc-panel').style.display = 'none';
+      document.getElementById('typing-main').classList.remove('toc-open');
+      document.getElementById('toc-toggle-btn').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'instant' });
       refocus();
     }
 
     function exitLoopMode() {
       loopMode = false;
       updateLoopSelectUI();
-      // 전체 텍스트 타이핑으로 복귀
+      // 전체 텍스트 타이핑으로 복귀 + TOC 복원
       initTyping(_loopFullText);
+      resolveHeadingPositions();
+      buildToc();
+      refocus();
+    }
+
+    function editLoopRange() {
+      if (!loopMode) return;
+      // 루프 모드 일시 중단, 전체 텍스트 복원
+      loopMode = false;
+      initTyping(_loopFullText);
+      resolveHeadingPositions();
+      buildToc();
+      // 기존 마커 위치로 선택 모드 복원
+      loopSelectMode = true;
+      loopSelectStep = 3;
+      _loopStartIdx = _loopStartIdxInFull;
+      _loopEndIdx = _loopEndIdxInFull;
+      _startMarkerEl = null;
+      _endMarkerEl = null;
+      _loopDragging = null;
+      document.getElementById('text-display').classList.add('loop-select-mode');
+      placeLoopMarker('start', _loopStartIdx);
+      placeLoopMarker('end', _loopEndIdx);
+      updateLoopRangeHighlight();
+      // 반복 횟수 패널 — 기존 설정 유지
+      const sliderVal = _loopCount === 0 ? 21 : _loopCount;
+      document.getElementById('loop-count-slider').value = sliderVal;
+      updateLoopSlider(sliderVal);
+      document.getElementById('loop-count-panel').style.display = '';
+      updateLoopSelectUI();
+      window.scrollTo({ top: 0, behavior: 'instant' });
       refocus();
     }
 
