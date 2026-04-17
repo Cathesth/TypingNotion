@@ -1745,6 +1745,12 @@
       else { titleWrap.style.display = 'none'; }
       initTyping(text);
       resolveHeadingPositions();
+      _headings.sort((a, b) => {
+        if (a.charIndex === -1 && b.charIndex === -1) return 0;
+        if (a.charIndex === -1) return 1;
+        if (b.charIndex === -1) return -1;
+        return a.charIndex - b.charIndex;
+      });
       buildToc();
       showScreen('s-typing');
       updateTocActive();
@@ -2248,23 +2254,45 @@
       return { text: outputLines.join('\n').trim(), headings, title };
     }
 
-    // chars[] 기준으로 각 헤딩의 charIndex 탐색 (텍스트 검색 방식 — 변환 후에도 robust)
+    // chars[] 기준으로 각 헤딩의 charIndex 탐색
     function resolveHeadingPositions() {
+      // 1단계: chars → 라인 목록 { start, text }
+      const lines = [];
+      let lineStart = 0;
+      let lineText = '';
+      for (let i = 0; i <= chars.length; i++) {
+        const ch = i < chars.length ? chars[i].char : '\n';
+        if (ch === '\n') {
+          const t = lineText.trim();
+          if (t) lines.push({ start: lineStart, text: t });
+          lineStart = i + 1;
+          lineText = '';
+        } else {
+          lineText += ch;
+        }
+      }
+
+      // 2단계: 헤딩 텍스트별로 본문 내 모든 등장 위치를 순서대로 수집
+      const headingTextSet = new Set(_headings.map(h => h.text).filter(Boolean));
+      const textPositions = new Map();
+      for (const line of lines) {
+        if (headingTextSet.has(line.text)) {
+          if (!textPositions.has(line.text)) textPositions.set(line.text, []);
+          textPositions.get(line.text).push(line.start);
+        }
+      }
+
+      // 3단계: _headings 순서대로 순회하며 n번째 동일 텍스트 → n번째 위치 배정
+      const usageCount = new Map();
       for (const h of _headings) {
         h.charIndex = -1;
-        const t = h.text;
-        if (!t) continue;
-        outer: for (let i = 0; i <= chars.length - t.length; i++) {
-          // 줄 시작 조건
-          if (i > 0 && chars[i - 1].char !== '\n') continue;
-          for (let j = 0; j < t.length; j++) {
-            if (chars[i + j].char !== t[j]) continue outer;
-          }
-          // 줄 끝 조건 (헤딩은 독립된 한 줄)
-          const end = i + t.length;
-          if (end < chars.length && chars[end].char !== '\n') continue;
-          h.charIndex = i;
-          break;
+        if (!h.text) continue;
+        const positions = textPositions.get(h.text);
+        if (!positions) continue;
+        const n = usageCount.get(h.text) || 0;
+        if (n < positions.length) {
+          h.charIndex = positions[n];
+          usageCount.set(h.text, n + 1);
         }
       }
     }
