@@ -5,8 +5,8 @@
 ## 미리보기
 
 <table><tr>
-<td><img src="https://github.com/user-attachments/assets/111f3385-0708-469d-ac99-b4a858b0762a" alt="메인 페이지"/></td>
-<td><img src="https://github.com/user-attachments/assets/61bf4929-54f0-44fc-9409-60cca2a3a8bb" alt="타이핑 화면"/></td>
+<td><img src="https://github.com/user-attachments/assets/2ecd5033-402b-437a-9e2d-32d886f2aa23" alt="메인 페이지"/></td>
+<td><img src="https://github.com/user-attachments/assets/02dc93bf-4240-4e34-964e-9126c395bb91" alt="타이핑 화면"/></td>
 </tr></table>
 
 ## 시작하기
