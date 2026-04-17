@@ -2,6 +2,13 @@
 
 노션 페이지로 타이핑 연습을 할 수 있는 단일 HTML 앱입니다.
 
+## 미리보기
+
+<table><tr>
+<td><img src="https://github.com/user-attachments/assets/111f3385-0708-469d-ac99-b4a858b0762a" alt="메인 페이지"/></td>
+<td><img src="https://github.com/user-attachments/assets/61bf4929-54f0-44fc-9409-60cca2a3a8bb" alt="타이핑 화면"/></td>
+</tr></table>
+
 ## 시작하기
 
 ### 웹에서 바로 사용
