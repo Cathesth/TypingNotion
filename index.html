@@ -324,33 +324,45 @@
     }
 
     /* 커스텀 스크롤바 — 사이트 톤앤매너 (인디고, 얇게) */
-    #toc-panel {
+    #toc-panel, #source-ta, #preview-ta {
       scrollbar-width: thin;
       scrollbar-color: rgba(99, 102, 241, .18) transparent;
     }
 
-    #toc-panel::-webkit-scrollbar {
+    #toc-panel::-webkit-scrollbar,
+    #source-ta::-webkit-scrollbar,
+    #preview-ta::-webkit-scrollbar {
       width: 3px;
     }
 
-    #toc-panel::-webkit-scrollbar-track {
+    #toc-panel::-webkit-scrollbar-track,
+    #source-ta::-webkit-scrollbar-track,
+    #preview-ta::-webkit-scrollbar-track {
       background: transparent;
     }
 
-    #toc-panel::-webkit-scrollbar-thumb {
+    #toc-panel::-webkit-scrollbar-thumb,
+    #source-ta::-webkit-scrollbar-thumb,
+    #preview-ta::-webkit-scrollbar-thumb {
       background: rgba(99, 102, 241, .18);
       border-radius: 2px;
     }
 
-    #toc-panel::-webkit-scrollbar-thumb:hover {
+    #toc-panel::-webkit-scrollbar-thumb:hover,
+    #source-ta::-webkit-scrollbar-thumb:hover,
+    #preview-ta::-webkit-scrollbar-thumb:hover {
       background: rgba(99, 102, 241, .38);
     }
 
-    .dark #toc-panel::-webkit-scrollbar-thumb {
+    .dark #toc-panel::-webkit-scrollbar-thumb,
+    .dark #source-ta::-webkit-scrollbar-thumb,
+    .dark #preview-ta::-webkit-scrollbar-thumb {
       background: rgba(129, 140, 248, .2);
     }
 
-    .dark #toc-panel::-webkit-scrollbar-thumb:hover {
+    .dark #toc-panel::-webkit-scrollbar-thumb:hover,
+    .dark #source-ta::-webkit-scrollbar-thumb:hover,
+    .dark #preview-ta::-webkit-scrollbar-thumb:hover {
       background: rgba(129, 140, 248, .42);
     }
 
@@ -480,7 +492,7 @@
       <div class="flex items-center justify-between mb-2">
         <div>
           <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span
-              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.2</span>
+              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.3</span>
           </h1>
           <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
             If you find this useful, please
