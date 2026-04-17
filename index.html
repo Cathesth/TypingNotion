@@ -217,6 +217,30 @@
       border-top-color: #a1a1aa;
     }
 
+    /* ── Custom tooltip ───────────────────────────────────────────────── */
+    #tip {
+      position: fixed;
+      z-index: 9999;
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-family: 'Pretendard', ui-monospace, monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .01em;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .12s ease;
+      background: #27272a;
+      color: #e4e4e7;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+    html.dark #tip {
+      background: #52525b;
+      color: #f4f4f5;
+      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+    }
+
     /* ── Tab active ────────────────────────────────────────────────────── */
     .tab-btn {
       border-bottom: 2px solid transparent;
@@ -316,23 +340,23 @@
       cursor: pointer;
       transition: background .1s, color .1s;
     }
-    .dark .toc-toggle-btn { color: #3f3f46; }
+    .dark .toc-toggle-btn { color: #71717a; }
     .toc-toggle-btn:hover { background: rgba(99, 102, 241, .1); color: #6366f1; }
     .dark .toc-toggle-btn:hover { background: rgba(129, 140, 248, .1); color: #818cf8; }
     .toc-item-text {
       flex: 1;
       font-family: 'Pretendard', sans-serif;
       font-size: 12px;
-      color: #a1a1aa;
+      color: #71717a;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       line-height: 1.55;
       transition: color .1s;
     }
-    .dark .toc-item-text { color: #52525b; }
-    .toc-item:hover .toc-item-text { color: #52525b; }
-    .dark .toc-item:hover .toc-item-text { color: #a1a1aa; }
+    .dark .toc-item-text { color: #a1a1aa; }
+    .toc-item:hover .toc-item-text { color: #3f3f46; }
+    .dark .toc-item:hover .toc-item-text { color: #d4d4d8; }
     .toc-item.toc-active .toc-item-text { color: #6366f1; font-weight: 600; }
     .dark .toc-item.toc-active .toc-item-text { color: #818cf8; }
     .toc-start-btn {
@@ -366,7 +390,7 @@
 
       <div class="flex items-center justify-between mb-2">
         <div>
-          <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.0</span></h1>
+          <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.1</span></h1>
           <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
             If you find this useful, please
             <a href="https://github.com/Cathesth/TypingNotion" target="_blank" rel="noopener"
@@ -375,7 +399,7 @@
           </p>
         </div>
         <div class="flex items-center gap-1">
-          <a href="https://github.com/Cathesth/TypingNotion" target="_blank" rel="noopener" title="GitHub" class="w-8 h-8 flex items-center justify-center rounded-md
+          <a href="https://github.com/Cathesth/TypingNotion" target="_blank" rel="noopener" data-tip="GitHub" class="w-8 h-8 flex items-center justify-center rounded-md
                   text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200
                   hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
             <svg aria-hidden="true" width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
@@ -391,7 +415,7 @@
           </a>
           <button onclick="toggleTheme()" class="w-8 h-8 flex items-center justify-center rounded-md
                  text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200
-                 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" title="테마 전환"><span
+                 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" data-tip="테마 전환"><span
               class="theme-icon">🌙</span></button>
         </div>
       </div>
@@ -427,6 +451,11 @@
           </button>
         </div>
         <p id="fetch-status" class="mt-2.5 font-mono text-xs min-h-[16px]"></p>
+        <div id="fetch-progress-wrap" style="display:none" class="mt-1.5">
+          <div class="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-[3px]">
+            <div id="fetch-progress-bar" class="bg-indigo-500 h-[3px] rounded-full" style="width:0%"></div>
+          </div>
+        </div>
 
         <!-- 노션 게시 가이드 -->
         <div class="mt-3">
@@ -564,6 +593,11 @@
         <span class="mr-auto"></span>
 
         <div class="flex items-center gap-1.5">
+          <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">시간</span>
+          <span id="st-time"
+            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-9 text-right tabular-nums">—</span>
+        </div>
+        <div class="flex items-center gap-1.5">
           <span id="st-pos"
             class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 tabular-nums whitespace-nowrap"></span>
           <span id="st-prog"
@@ -585,7 +619,7 @@
                 class="w-7 h-7 flex items-center justify-center rounded
                        font-mono text-[10px] font-semibold
                        text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400
-                       hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" title="목차">
+                       hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" data-tip="목차">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/>
@@ -594,7 +628,7 @@
 
         <!-- Settings toggle -->
         <button onclick="toggleSettings(event)" class="w-7 h-7 flex items-center justify-center rounded
-               text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" title="스킵 설정">
+               text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" data-tip="스킵 설정">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3" />
@@ -604,7 +638,7 @@
         </button>
 
         <button onclick="toggleTheme()" class="w-7 h-7 flex items-center justify-center rounded
-               text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" title="테마 전환"><span
+               text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" data-tip="테마 전환"><span
             class="theme-icon">🌙</span></button>
       </div>
     </header>
@@ -692,7 +726,7 @@
           <p id="r-time" class="font-mono text-xl font-bold text-zinc-800 dark:text-zinc-200"></p>
         </div>
         <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
-          <p class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">WPM</p>
+          <p id="r-wpm-label" class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">WPM</p>
           <p id="r-wpm" class="font-mono text-xl font-bold text-zinc-800 dark:text-zinc-200"></p>
         </div>
         <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
@@ -801,6 +835,46 @@
 ══════════════════════════════════════════════ -->
   <script>
     'use strict';
+
+    // ─── Tooltip ──────────────────────────────────────────────────────────────────
+    (function () {
+      const tip = document.createElement('div');
+      tip.id = 'tip';
+      document.body.appendChild(tip);
+
+      function show(target) {
+        tip.textContent = target.dataset.tip;
+        tip.style.opacity = '0';
+        // 먼저 렌더링 후 크기 측정
+        requestAnimationFrame(() => {
+          const r = target.getBoundingClientRect();
+          const tw = tip.offsetWidth;
+          const th = tip.offsetHeight;
+          const gap = 6;
+          const pos = target.dataset.tipPos || 'bottom';
+          let x = r.left + r.width / 2 - tw / 2;
+          let y = pos === 'top' ? r.top - th - gap : r.bottom + gap;
+          // 뷰포트 좌우 이탈 방지
+          x = Math.max(6, Math.min(x, window.innerWidth - tw - 6));
+          tip.style.left = x + 'px';
+          tip.style.top = y + 'px';
+          tip.style.opacity = '1';
+        });
+      }
+
+      function hide() { tip.style.opacity = '0'; }
+
+      document.addEventListener('mouseover', e => {
+        const t = e.target.closest('[data-tip]');
+        if (t) show(t); else hide();
+      });
+      document.addEventListener('mouseout', e => {
+        const from = e.target.closest('[data-tip]');
+        if (from && from !== e.relatedTarget?.closest('[data-tip]')) hide();
+      });
+      document.addEventListener('mousedown', hide);
+      document.addEventListener('scroll', hide, true);
+    })();
 
     // ─── Theme ────────────────────────────────────────────────────────────────────
     (function () {
@@ -971,12 +1045,10 @@
 
       const btn = document.getElementById('fetch-btn');
       btn.disabled = true;
-      setFetchStatus('loading', '페이지를 불러오는 중…');
       document.getElementById('preview-wrap').style.display = 'none';
       document.getElementById('notion-title-wrap').style.display = 'none';
 
       try {
-        setFetchStatus('loading', 'Jina Reader로 페이지 변환 중…');
         const { text: fetchedText, headings: fetchedHeadings, title: fetchedTitle } = await fetchViaJinaReader(url, fetchAbort.signal);
         _pendingHeadings = fetchedHeadings;
         _pendingTitle = fetchedTitle;
@@ -997,7 +1069,7 @@
         const cnt = fetchedText.split('\n').filter(l => l.trim()).length;
         setFetchStatus('ok', `✓ ${cnt}개 단락 추출됨`);
       } catch (e) {
-        if (e.name === 'AbortError') return;
+        if (e.name === 'AbortError') { snapProg(0); return; }
         setFetchStatus('err', e.message || '불러오기에 실패했습니다.');
       } finally {
         btn.disabled = false;
@@ -1008,16 +1080,28 @@
     // r.jina.ai는 서버사이드 렌더러 + CORS 헤더 포함 → file:// 환경에서도 동작
     async function fetchViaJinaReader(url, signal) {
       const base = `https://r.jina.ai/${url}`;
-      // text(본문) 먼저, markdown(헤딩) 순차 요청
+
+      // 1단계: 본문(text) — 0%에서 48%까지 25초 동안 ease-out 애니메이션
+      // 응답이 오면 즉시 90%로 snap
+      setFetchStatus('loading', '본문 불러오는 중… (1/2)');
+      animateProg(0, 88, 25000);
       const txtRes = await timedFetch(base, 60000, signal, { headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text', 'X-No-Cache': 'true', 'X-Timeout': '30' } });
       if (!txtRes?.ok) throw new Error(`Jina Reader 오류: ${txtRes?.status}`);
       const txtRaw = await txtRes.text();
+      snapProg(90);
 
+      // 2단계: 목차(markdown) — 90%에서 95%까지
+      setFetchStatus('loading', '목차 구조 분석 중… (2/2)');
+      animateProg(90, 94, 20000);
       const mdRes = await timedFetch(base, 40000, signal, { headers: { 'Accept': 'text/plain', 'X-Return-Format': 'markdown' } });
       if (!mdRes?.ok) throw new Error(`Jina Reader 오류: ${mdRes?.status}`);
       const mdRaw = await mdRes.text();
+      snapProg(95);
 
-      return combineJinaFormats(mdRaw, txtRaw);
+      // 3단계: 텍스트 정리
+      setFetchStatus('loading', '텍스트 정리 중…');
+      const result = combineJinaFormats(mdRaw, txtRaw);
+      return result;
     }
 
     // markdown에서 헤딩·제목, text에서 깨끗한 본문 → 합성
@@ -1216,9 +1300,43 @@
 
     function setFetchStatus(type, msg) {
       const el = document.getElementById('fetch-status');
+      const wrap = document.getElementById('fetch-progress-wrap');
       const cls = { loading: 'text-zinc-400 dark:text-zinc-500', ok: 'text-green-600 dark:text-green-400', err: 'text-red-500' }[type];
       el.className = `mt-2.5 font-mono text-xs min-h-[16px] ${cls}`;
       el.innerHTML = type === 'loading' ? `<span class="spin"></span>${msg}` : msg;
+      if (type === 'loading') {
+        wrap.style.display = '';
+      } else {
+        // ok/err: 100% 채운 뒤 잠깐 후 숨김
+        snapProg(100);
+        setTimeout(() => { wrap.style.display = 'none'; snapProg(0); }, 600);
+      }
+    }
+
+    // ─── Progress animation ───────────────────────────────────────────────────────
+    let _progRaf = null;
+    let _progCur = 0;
+
+    // ease-out cubic: 빠르게 시작 → 목표에 가까워질수록 감속
+    function animateProg(from, to, durationMs) {
+      if (_progRaf) { cancelAnimationFrame(_progRaf); _progRaf = null; }
+      _progCur = from;
+      const startTime = performance.now();
+      function tick(now) {
+        const t = Math.min((now - startTime) / durationMs, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        _progCur = from + (to - from) * eased;
+        document.getElementById('fetch-progress-bar').style.width = _progCur + '%';
+        if (t < 1) _progRaf = requestAnimationFrame(tick);
+      }
+      _progRaf = requestAnimationFrame(tick);
+    }
+
+    // 애니메이션 중단 후 즉시 특정 값으로 점프
+    function snapProg(pct) {
+      if (_progRaf) { cancelAnimationFrame(_progRaf); _progRaf = null; }
+      _progCur = pct;
+      document.getElementById('fetch-progress-bar').style.width = pct + '%';
     }
 
 
@@ -1461,6 +1579,7 @@
       resolveHeadingPositions();
       buildToc();
       showScreen('s-typing');
+      updateTocActive();
       refocus();
     }
 
@@ -1479,6 +1598,7 @@
     let startTime = null;
     let totalTyped = 0;
     let correctTyped = 0;
+    let _timerInterval = null;
     let isComposing = false;
     let justComposed = false;
     let spaceQueued = false; // 한글 조합 중/직후 스페이스 누름 대기
@@ -1495,6 +1615,8 @@
       totalTyped = 0; correctTyped = 0; errorLog = [];
       isComposing = false; justComposed = false; spaceQueued = false;
       _lastKeyWasBackspace = false; _skipGroupCounter = 0;
+      if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+      document.getElementById('st-time').textContent = '—';
       hiddenInp.value = '';
       display.innerHTML = '';
 
@@ -1565,10 +1687,22 @@
       c.el.textContent = data || c.char;
     }
 
+    function startTimerIfNeeded() {
+      if (startTime) return;
+      startTime = performance.now();
+      _timerInterval = setInterval(() => {
+        if (!startTime) return;
+        const s = Math.floor((performance.now() - startTime) / 1000);
+        const m = Math.floor(s / 60);
+        document.getElementById('st-time').textContent =
+          m > 0 ? `${m}:${String(s % 60).padStart(2, '0')}` : `${s}s`;
+      }, 1000);
+    }
+
     // ─── Type a character ─────────────────────────────────────────────────────────
     function typeChar(key) {
       if (cursorIdx >= chars.length) return;
-      if (!startTime) startTime = performance.now();
+      startTimerIfNeeded();
 
       const expected = chars[cursorIdx].char;
       const correct = key === expected;
@@ -1601,6 +1735,7 @@
       if (cursorIdx >= chars.length) return;
       const startCh = chars[cursorIdx].char;
       if (startCh === ' ') return;
+      startTimerIfNeeded();
       const chunkType = getCharType(startCh);
 
       const groupId = _skipGroupCounter;
@@ -2019,12 +2154,14 @@
         const textSpan = document.createElement('span');
         textSpan.className = 'toc-item-text';
         textSpan.textContent = node.text;
-        textSpan.title = node.text;
+        textSpan.dataset.tip = node.text;
+        textSpan.dataset.tipPos = 'bottom';
 
         const startBtn = document.createElement('button');
         startBtn.className = 'toc-start-btn';
         startBtn.textContent = '▶';
-        startBtn.title = '여기서 시작';
+        startBtn.dataset.tip = '여기서 시작';
+        startBtn.dataset.tipPos = 'bottom';
 
         item.appendChild(toggleBtn);
         item.appendChild(textSpan);
@@ -2166,15 +2303,26 @@
         updateLoopSelectUI();
       }
 
+      if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
+
       const elapsed = startTime ? performance.now() - startTime : 0;
       const secs = Math.round(elapsed / 1000);
       const mins = elapsed / 60000;
-      const wpm = mins > 0 ? Math.round((correctTyped / 5) / mins) : 0;
       const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 100;
       const timeStr = secs >= 60 ? `${Math.floor(secs / 60)}m ${secs % 60}s` : `${secs}s`;
 
+      // 한글만 모드: CPM(분당 글자수) 표시 — 한글은 자모 단위가 아닌 음절 단위가 체감 속도와 일치
+      // 일반 모드: 영문 표준 WPM (correctTyped / 5 / mins)
+      const isKoreanOnly = settings.onlyKorean;
+      const speed = mins > 0
+        ? isKoreanOnly
+          ? Math.round(correctTyped / mins)          // CPM
+          : Math.round((correctTyped / 5) / mins)    // WPM
+        : 0;
+      document.getElementById('r-wpm-label').textContent = isKoreanOnly ? 'CPM' : 'WPM';
+
       document.getElementById('r-time').textContent = timeStr;
-      document.getElementById('r-wpm').textContent = wpm;
+      document.getElementById('r-wpm').textContent = speed;
       document.getElementById('r-acc').textContent = accuracy + '%';
       document.getElementById('r-errs').textContent = errorCount;
 
