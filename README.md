@@ -1,10 +1,16 @@
 # TypingNotion
 
-노션 페이지의 내용으로 타이핑 연습을 할 수 있는 단일 HTML 앱입니다.
+노션 페이지로 타이핑 연습을 할 수 있는 단일 HTML 앱입니다.
 
-## 다운로드
+## 시작하기
 
-**[Releases](https://github.com/Cathesth/TypingNotion/releases)** 에서 `TypingNotion.html` 파일을 다운받아 브라우저로 열면 바로 사용 가능합니다.  
+### 웹에서 바로 사용
+
+**[typingnotion.vercel.app](https://typingnotion.vercel.app)** 에 접속하면 설치 없이 바로 사용할 수 있습니다.
+
+### 로컬에서 사용
+
+**[Releases](https://github.com/Cathesth/TypingNotion/releases)** 에서 `TypingNotion.html` 파일을 다운받아 브라우저로 열면 됩니다.  
 설치 불필요, 인터넷 연결만 있으면 됩니다.
 
 ## 사용법
