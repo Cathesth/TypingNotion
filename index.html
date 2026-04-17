@@ -318,14 +318,6 @@
       outline-color: rgba(129, 140, 248, .6);
     }
 
-    /* ── TOC sidebar ──────────────────────────────────────────────────── */
-    #typing-main.toc-open {
-      padding-right: 208px;
-    }
-    #typing-header.toc-open {
-      padding-right: 208px;
-    }
-
     /* 커스텀 스크롤바 — 사이트 톤앤매너 (인디고, 얇게) */
     #toc-panel, #source-ta, #preview-ta {
       scrollbar-width: thin;
@@ -2253,8 +2245,7 @@
       const valid = _headings.filter(h => h.charIndex !== -1);
       if (!valid.length) {
         panel.style.display = 'none';
-        document.getElementById('typing-main').classList.remove('toc-open');
-        document.getElementById('typing-header').classList.remove('toc-open');
+
         btn.style.display = 'none';
         return;
       }
@@ -2330,8 +2321,7 @@
 
       if (_tocOpen) {
         panel.style.display = '';
-        document.getElementById('typing-main').classList.add('toc-open');
-        document.getElementById('typing-header').classList.add('toc-open');
+
       }
     }
 
@@ -2356,8 +2346,7 @@
       const hasHeadings = _headings.some(h => h.charIndex !== -1);
       if (!hasHeadings) return;
       panel.style.display = open ? '' : 'none';
-      document.getElementById('typing-main').classList.toggle('toc-open', open);
-      document.getElementById('typing-header').classList.toggle('toc-open', open);
+
     }
 
     function scrollToHeading(charIdx) {
@@ -2496,8 +2485,7 @@
         initTyping(_loopText);
         // 구간반복 재시작 — TOC 숨김
         document.getElementById('toc-panel').style.display = 'none';
-        document.getElementById('typing-main').classList.remove('toc-open');
-        document.getElementById('typing-header').classList.remove('toc-open');
+
         document.getElementById('toc-toggle-btn').style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'instant' });
         showScreen('s-typing');
