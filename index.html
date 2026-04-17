@@ -41,7 +41,8 @@
     /* 라인 단위 렌더링 컨테이너 — content-visibility로 화면 밖 라인 렌더링 생략 */
     .tl {
       content-visibility: auto;
-      contain-intrinsic-size: auto 3.12rem; /* 1.2rem × line-height 2.6 */
+      contain-intrinsic-size: auto 3.12rem;
+      /* 1.2rem × line-height 2.6 */
       word-break: break-word;
     }
 
@@ -188,10 +189,20 @@
 
     /* ── Custom modal ─────────────────────────────────────────────────── */
     @keyframes modal-in {
-      from { opacity: 0; transform: scale(.95) translateY(4px); }
-      to   { opacity: 1; transform: scale(1)  translateY(0); }
+      from {
+        opacity: 0;
+        transform: scale(.95) translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
-    .modal-box { animation: modal-in .15s ease-out; }
+
+    .modal-box {
+      animation: modal-in .15s ease-out;
+    }
 
     /* ── Spinner ───────────────────────────────────────────────────────── */
     @keyframes spin {
@@ -233,12 +244,13 @@
       transition: opacity .12s ease;
       background: #27272a;
       color: #e4e4e7;
-      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
     }
+
     html.dark #tip {
       background: #52525b;
       color: #f4f4f5;
-      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .5);
     }
 
     /* ── Tab active ────────────────────────────────────────────────────── */
@@ -265,13 +277,20 @@
       cursor: grab;
       user-select: none;
     }
-    .loop-marker:active { cursor: grabbing; }
-    .dark .loop-marker { color: #818cf8; }
+
+    .loop-marker:active {
+      cursor: grabbing;
+    }
+
+    .dark .loop-marker {
+      color: #818cf8;
+    }
 
     .ch-loop-range {
       background: rgba(99, 102, 241, .07);
       border-radius: 2px;
     }
+
     .dark .ch-loop-range {
       background: rgba(129, 140, 248, .09);
     }
@@ -279,10 +298,12 @@
     #text-display.loop-select-mode .ch {
       cursor: crosshair;
     }
+
     #text-display.loop-select-mode .ch:not(.ch-loop-range):hover {
       background: rgba(99, 102, 241, .12);
       border-radius: 2px;
     }
+
     .dark #text-display.loop-select-mode .ch:not(.ch-loop-range):hover {
       background: rgba(129, 140, 248, .14);
     }
@@ -292,6 +313,7 @@
       outline-offset: -1px;
       border-radius: 2px;
     }
+
     .dark .ch-loop-drag-hover {
       outline-color: rgba(129, 140, 248, .6);
     }
@@ -300,20 +322,38 @@
     #typing-main.toc-open {
       padding-right: 220px;
     }
+
     /* 커스텀 스크롤바 — 사이트 톤앤매너 (인디고, 얇게) */
     #toc-panel {
       scrollbar-width: thin;
       scrollbar-color: rgba(99, 102, 241, .18) transparent;
     }
-    #toc-panel::-webkit-scrollbar { width: 3px; }
-    #toc-panel::-webkit-scrollbar-track { background: transparent; }
+
+    #toc-panel::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    #toc-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
     #toc-panel::-webkit-scrollbar-thumb {
       background: rgba(99, 102, 241, .18);
       border-radius: 2px;
     }
-    #toc-panel::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, .38); }
-    .dark #toc-panel::-webkit-scrollbar-thumb { background: rgba(129, 140, 248, .2); }
-    .dark #toc-panel::-webkit-scrollbar-thumb:hover { background: rgba(129, 140, 248, .42); }
+
+    #toc-panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, .38);
+    }
+
+    .dark #toc-panel::-webkit-scrollbar-thumb {
+      background: rgba(129, 140, 248, .2);
+    }
+
+    .dark #toc-panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(129, 140, 248, .42);
+    }
+
     .toc-item {
       display: flex;
       align-items: center;
@@ -325,24 +365,43 @@
       cursor: pointer;
       transition: background .1s;
     }
-    .toc-item:hover { background: rgba(99, 102, 241, .06); }
-    .dark .toc-item:hover { background: rgba(129, 140, 248, .08); }
+
+    .toc-item:hover {
+      background: rgba(99, 102, 241, .06);
+    }
+
+    .dark .toc-item:hover {
+      background: rgba(129, 140, 248, .08);
+    }
+
     .toc-toggle-btn {
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
-      font-size: 13px;
-      border-radius: 4px;
+      width: 16px;
+      height: 20px;
+      font-size: 10px;
+      border-radius: 3px;
       color: #d4d4d8;
       cursor: pointer;
       transition: background .1s, color .1s;
     }
-    .dark .toc-toggle-btn { color: #71717a; }
-    .toc-toggle-btn:hover { background: rgba(99, 102, 241, .1); color: #6366f1; }
-    .dark .toc-toggle-btn:hover { background: rgba(129, 140, 248, .1); color: #818cf8; }
+
+    .dark .toc-toggle-btn {
+      color: #71717a;
+    }
+
+    .toc-toggle-btn:hover {
+      background: rgba(99, 102, 241, .1);
+      color: #6366f1;
+    }
+
+    .dark .toc-toggle-btn:hover {
+      background: rgba(129, 140, 248, .1);
+      color: #818cf8;
+    }
+
     .toc-item-text {
       flex: 1;
       font-family: 'Pretendard', sans-serif;
@@ -354,11 +413,28 @@
       line-height: 1.55;
       transition: color .1s;
     }
-    .dark .toc-item-text { color: #a1a1aa; }
-    .toc-item:hover .toc-item-text { color: #3f3f46; }
-    .dark .toc-item:hover .toc-item-text { color: #d4d4d8; }
-    .toc-item.toc-active .toc-item-text { color: #6366f1; font-weight: 600; }
-    .dark .toc-item.toc-active .toc-item-text { color: #818cf8; }
+
+    .dark .toc-item-text {
+      color: #a1a1aa;
+    }
+
+    .toc-item:hover .toc-item-text {
+      color: #3f3f46;
+    }
+
+    .dark .toc-item:hover .toc-item-text {
+      color: #d4d4d8;
+    }
+
+    .toc-item.toc-active .toc-item-text {
+      color: #6366f1;
+      font-weight: 600;
+    }
+
+    .dark .toc-item.toc-active .toc-item-text {
+      color: #818cf8;
+    }
+
     .toc-start-btn {
       display: none;
       flex-shrink: 0;
@@ -373,10 +449,23 @@
       cursor: pointer;
       transition: background .1s;
     }
-    .dark .toc-start-btn { color: #818cf8; background: rgba(129, 140, 248, .12); }
-    .toc-start-btn:hover { background: rgba(99, 102, 241, .2); }
-    .dark .toc-start-btn:hover { background: rgba(129, 140, 248, .22); }
-    .toc-item:hover .toc-start-btn { display: block; }
+
+    .dark .toc-start-btn {
+      color: #818cf8;
+      background: rgba(129, 140, 248, .12);
+    }
+
+    .toc-start-btn:hover {
+      background: rgba(99, 102, 241, .2);
+    }
+
+    .dark .toc-start-btn:hover {
+      background: rgba(129, 140, 248, .22);
+    }
+
+    .toc-item:hover .toc-start-btn {
+      display: block;
+    }
   </style>
 </head>
 
@@ -390,7 +479,9 @@
 
       <div class="flex items-center justify-between mb-2">
         <div>
-          <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.1</span></h1>
+          <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span
+              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.2</span>
+          </h1>
           <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
             If you find this useful, please
             <a href="https://github.com/Cathesth/TypingNotion" target="_blank" rel="noopener"
@@ -464,7 +555,7 @@
             <svg id="guide-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
               class="transition-transform duration-200">
-              <polyline points="9 18 15 12 9 6"/>
+              <polyline points="9 18 15 12 9 6" />
             </svg>
             노션 URL 사용법
           </button>
@@ -486,8 +577,8 @@
                 <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
                   <span class="text-indigo-400 font-semibold">02</span> 게시 탭으로 이동
                 </p>
-                <img src="https://github.com/user-attachments/assets/8362668f-3ad2-4ff7-b430-724b7ad21d92"
-                  alt="게시 탭 이동" class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
+                <img src="https://github.com/user-attachments/assets/8362668f-3ad2-4ff7-b430-724b7ad21d92" alt="게시 탭 이동"
+                  class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
               </div>
               <!-- Step 3 -->
               <div class="space-y-1">
@@ -502,15 +593,16 @@
                 <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
                   <span class="text-indigo-400 font-semibold">04</span> 주소 복사 후 붙여넣기
                 </p>
-                <img src="https://github.com/user-attachments/assets/27103dfb-3e76-40a9-abf3-ba1ea588a1c0"
-                  alt="주소 복사" class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
+                <img src="https://github.com/user-attachments/assets/27103dfb-3e76-40a9-abf3-ba1ea588a1c0" alt="주소 복사"
+                  class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
               </div>
             </div>
           </div>
         </div>
         <div id="preview-wrap" style="display:none" class="mt-4">
           <p class="font-mono text-xs text-zinc-400 dark:text-zinc-500 mb-1.5">추출된 텍스트 — 수정 후 시작하세요</p>
-          <div id="notion-title-wrap" style="display:none" class="mb-3 px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
+          <div id="notion-title-wrap" style="display:none"
+            class="mb-3 px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">페이지 제목</span>
             <p id="notion-title-text" class="font-mono text-sm text-zinc-800 dark:text-zinc-200 font-medium mt-0.5"></p>
           </div>
@@ -564,82 +656,84 @@
       <div class="h-[2px] bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
         <div id="prog-bar-fill" class="h-full bg-indigo-400 dark:bg-indigo-500" style="width:0%"></div>
       </div>
-      <div class="max-w-3xl mx-auto px-5 h-11 flex items-center gap-4">
+      <div class="max-w-3xl mx-auto px-5 h-11 flex items-center gap-2">
 
         <button onclick="onBack()" class="font-mono text-xs text-zinc-400 hover:text-zinc-700
-               dark:hover:text-zinc-300 transition-colors whitespace-nowrap">
+               dark:hover:text-zinc-300 transition-colors whitespace-nowrap shrink-0">
           ← 처음으로
         </button>
-        <span class="font-mono text-[10px] text-zinc-300 dark:text-zinc-600 whitespace-nowrap">Ctrl+R 재시작</span>
+        <span id="ctrl-r-hint" class="font-mono text-[10px] text-zinc-300 dark:text-zinc-600 whitespace-nowrap shrink-0">Ctrl+R 재시작</span>
 
         <!-- 구간반복 진입 버튼 (루프 모드 아닐 때) -->
         <button id="loop-select-btn" onclick="enterLoopSelectMode()" class="font-mono text-[10px] text-zinc-400 hover:text-zinc-700
-               dark:hover:text-zinc-300 transition-colors whitespace-nowrap">구간반복</button>
+               dark:hover:text-zinc-300 transition-colors whitespace-nowrap shrink-0">구간반복</button>
 
         <!-- 선택 모드 안내 (클릭 중) -->
         <span id="loop-select-hint" style="display:none"
-              class="font-mono text-[10px] text-indigo-500 dark:text-indigo-400 whitespace-nowrap"></span>
+          class="font-mono text-[10px] text-indigo-500 dark:text-indigo-400 whitespace-nowrap shrink-0"></span>
 
         <!-- 루프 중 표시 -->
         <span id="loop-round-info" style="display:none"
-              class="font-mono text-xs font-semibold text-indigo-500 dark:text-indigo-400 whitespace-nowrap tabular-nums"></span>
-        <button id="loop-edit-btn" style="display:none" onclick="editLoopRange()"
-               class="font-mono text-[10px] text-zinc-400 hover:text-indigo-500
-               dark:hover:text-indigo-400 transition-colors whitespace-nowrap">범위 수정</button>
-        <button id="loop-exit-btn" style="display:none" onclick="exitLoopMode()"
-               class="font-mono text-[10px] text-zinc-400 hover:text-red-500
-               dark:hover:text-red-400 transition-colors whitespace-nowrap">구간반복 끝내기</button>
+          class="font-mono text-xs font-semibold text-indigo-500 dark:text-indigo-400 whitespace-nowrap tabular-nums shrink-0"></span>
+        <button id="loop-edit-btn" style="display:none" onclick="editLoopRange()" class="font-mono text-[10px] text-zinc-400 hover:text-indigo-500
+               dark:hover:text-indigo-400 transition-colors whitespace-nowrap shrink-0">범위 수정</button>
+        <button id="loop-exit-btn" style="display:none" onclick="exitLoopMode()" class="font-mono text-[10px] text-zinc-400 hover:text-red-500
+               dark:hover:text-red-400 transition-colors whitespace-nowrap shrink-0">끝내기</button>
 
         <span class="mr-auto"></span>
 
-        <div class="flex items-center gap-1.5">
-          <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">시간</span>
+        <div class="flex items-center gap-1 shrink-0">
+          <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 whitespace-nowrap">시간</span>
           <span id="st-time"
             class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-9 text-right tabular-nums">—</span>
         </div>
-        <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-1 shrink-0">
           <span id="st-pos"
             class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 tabular-nums whitespace-nowrap"></span>
           <span id="st-prog"
-            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-11 text-right tabular-nums">0%</span>
+            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-10 text-right tabular-nums">0%</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">정확도</span>
+        <div class="flex items-center gap-1 shrink-0">
+          <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 whitespace-nowrap">정확도</span>
           <span id="st-acc"
-            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-11 text-right tabular-nums">—</span>
+            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-10 text-right tabular-nums">—</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500">오타</span>
+        <div class="flex items-center gap-1 shrink-0">
+          <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 whitespace-nowrap">오타</span>
           <span id="st-err"
-            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-6 text-right tabular-nums">0</span>
+            class="font-mono text-sm font-semibold text-zinc-700 dark:text-zinc-300 w-5 text-right tabular-nums">0</span>
         </div>
 
         <!-- TOC toggle -->
         <button id="toc-toggle-btn" style="display:none" onclick="toggleToc(!_tocOpen)"
-                class="w-7 h-7 flex items-center justify-center rounded
-                       font-mono text-[10px] font-semibold
+                class="w-7 h-7 flex items-center justify-center rounded shrink-0
                        text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400
                        hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" data-tip="목차">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/>
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="15" y2="12"/>
+            <line x1="3" y1="18" x2="18" y2="18"/>
           </svg>
         </button>
 
         <!-- Settings toggle -->
-        <button onclick="toggleSettings(event)" class="w-7 h-7 flex items-center justify-center rounded
-               text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" data-tip="스킵 설정">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+        <button onclick="toggleSettings(event)"
+                class="w-7 h-7 flex items-center justify-center rounded shrink-0
+                       text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" data-tip="스킵 설정">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
-            <path d="M12 2v2m0 16v2M2 12h2m16 0h2" />
+            <line x1="3" y1="6" x2="15" y2="6"/><line x1="19" y1="6" x2="21" y2="6"/><circle cx="17" cy="6" r="2"/>
+            <line x1="3" y1="12" x2="5" y2="12"/><line x1="9" y1="12" x2="21" y2="12"/><circle cx="7" cy="12" r="2"/>
+            <line x1="3" y1="18" x2="13" y2="18"/><line x1="17" y1="18" x2="21" y2="18"/><circle cx="15" cy="18" r="2"/>
           </svg>
         </button>
 
-        <button onclick="toggleTheme()" class="w-7 h-7 flex items-center justify-center rounded
-               text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" data-tip="테마 전환"><span
-            class="theme-icon">🌙</span></button>
+        <button onclick="toggleTheme()"
+                class="w-7 h-7 flex items-center justify-center rounded shrink-0
+                       text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" data-tip="테마 전환">
+          <span class="theme-icon">🌙</span>
+        </button>
       </div>
     </header>
 
@@ -681,24 +775,24 @@
       <div class="max-w-[700px] mx-auto px-8">
         <!-- 페이지 제목 (타이핑 불가, 노션 제목 표시용) -->
         <div id="typing-title" style="display:none" class="mb-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/70">
-          <p id="typing-title-text" class="font-semibold text-2xl text-zinc-300 dark:text-zinc-600 select-none tracking-tight leading-snug"></p>
+          <p id="typing-title-text"
+            class="font-semibold text-2xl text-zinc-300 dark:text-zinc-600 select-none tracking-tight leading-snug"></p>
         </div>
         <div id="text-display"></div>
       </div>
     </main>
 
     <!-- TOC sidebar -->
-    <aside id="toc-panel" style="display:none"
-           class="fixed top-11 right-0 bottom-0 w-52 z-10 overflow-y-auto
+    <aside id="toc-panel" style="display:none" class="fixed top-11 right-0 bottom-0 w-52 z-10 overflow-y-auto
                   bg-white/95 dark:bg-zinc-950/95
                   border-l border-zinc-100 dark:border-zinc-800
                   backdrop-blur-sm">
       <div class="sticky top-0 flex items-center justify-between px-3 py-2.5
                   bg-white/95 dark:bg-zinc-950/95
                   border-b border-zinc-100 dark:border-zinc-800">
-        <span class="font-mono text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">목차</span>
-        <button onclick="toggleToc(false)"
-                class="font-mono text-xs text-zinc-300 dark:text-zinc-600
+        <span
+          class="font-mono text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">목차</span>
+        <button onclick="toggleToc(false)" class="font-mono text-xs text-zinc-300 dark:text-zinc-600
                        hover:text-zinc-500 dark:hover:text-zinc-400 transition-colors leading-none">✕</button>
       </div>
       <div id="toc-list" class="py-1.5 px-0"></div>
@@ -717,8 +811,7 @@
   <div id="s-results" style="display:none" class="min-h-screen flex flex-col items-center justify-center px-6 py-16">
     <div class="w-full max-w-sm">
       <h2 class="font-mono text-2xl font-bold text-zinc-800 dark:text-zinc-200 mb-2">완료</h2>
-      <p id="r-loop-info" style="display:none"
-         class="font-mono text-xs text-indigo-400 dark:text-indigo-500 mb-7"></p>
+      <p id="r-loop-info" style="display:none" class="font-mono text-xs text-indigo-400 dark:text-indigo-500 mb-7"></p>
       <div id="r-loop-info-spacer" class="mb-7"></div>
       <div class="grid grid-cols-2 gap-3 mb-6">
         <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
@@ -726,7 +819,8 @@
           <p id="r-time" class="font-mono text-xl font-bold text-zinc-800 dark:text-zinc-200"></p>
         </div>
         <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
-          <p id="r-wpm-label" class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">WPM</p>
+          <p id="r-wpm-label"
+            class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">WPM</p>
           <p id="r-wpm" class="font-mono text-xl font-bold text-zinc-800 dark:text-zinc-200"></p>
         </div>
         <div class="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-4 border border-zinc-100 dark:border-zinc-800">
@@ -808,19 +902,18 @@
   <!-- ══════════════════════════════════════════════
      LOOP COUNT PANEL (bottom sheet)
 ══════════════════════════════════════════════ -->
-  <div id="loop-count-panel" style="display:none"
-       class="fixed bottom-0 left-0 right-0 z-30
+  <div id="loop-count-panel" style="display:none" class="fixed bottom-0 left-0 right-0 z-30
               bg-white/95 dark:bg-zinc-900/95
               border-t border-zinc-100 dark:border-zinc-800
               backdrop-blur-sm">
     <div class="max-w-lg mx-auto px-6 py-4 flex items-center gap-4">
       <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400 shrink-0">반복 횟수</span>
-      <span id="loop-count-display" class="font-mono text-sm font-bold text-indigo-500 dark:text-indigo-400 w-7 text-center shrink-0">5</span>
+      <span id="loop-count-display"
+        class="font-mono text-sm font-bold text-indigo-500 dark:text-indigo-400 w-7 text-center shrink-0">5</span>
       <div class="flex items-center gap-2 flex-1">
         <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 shrink-0">1</span>
-        <input type="range" id="loop-count-slider" min="1" max="21" value="5"
-               oninput="updateLoopSlider(this.value)"
-               class="flex-1 accent-indigo-500 cursor-pointer">
+        <input type="range" id="loop-count-slider" min="1" max="21" value="5" oninput="updateLoopSlider(this.value)"
+          class="flex-1 accent-indigo-500 cursor-pointer">
         <span class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 shrink-0">∞</span>
       </div>
       <button onclick="cancelLoopSelect()" class="font-mono text-xs text-zinc-400 hover:text-zinc-600
@@ -1069,7 +1162,7 @@
         const cnt = fetchedText.split('\n').filter(l => l.trim()).length;
         setFetchStatus('ok', `✓ ${cnt}개 단락 추출됨`);
       } catch (e) {
-        if (e.name === 'AbortError') { snapProg(0); return; }
+        if (e.name === 'AbortError') { resetProg(); return; }
         setFetchStatus('err', e.message || '불러오기에 실패했습니다.');
       } finally {
         btn.disabled = false;
@@ -1084,7 +1177,7 @@
       // 1단계: 본문(text) — 0%에서 48%까지 25초 동안 ease-out 애니메이션
       // 응답이 오면 즉시 90%로 snap
       setFetchStatus('loading', '본문 불러오는 중… (1/2)');
-      animateProg(0, 88, 25000);
+      animateProg(88, 25000);
       const txtRes = await timedFetch(base, 60000, signal, { headers: { 'Accept': 'text/plain', 'X-Return-Format': 'text', 'X-No-Cache': 'true', 'X-Timeout': '30' } });
       if (!txtRes?.ok) throw new Error(`Jina Reader 오류: ${txtRes?.status}`);
       const txtRaw = await txtRes.text();
@@ -1092,7 +1185,7 @@
 
       // 2단계: 목차(markdown) — 90%에서 95%까지
       setFetchStatus('loading', '목차 구조 분석 중… (2/2)');
-      animateProg(90, 94, 20000);
+      animateProg(94, 20000);
       const mdRes = await timedFetch(base, 40000, signal, { headers: { 'Accept': 'text/plain', 'X-Return-Format': 'markdown' } });
       if (!mdRes?.ok) throw new Error(`Jina Reader 오류: ${mdRes?.status}`);
       const mdRaw = await mdRes.text();
@@ -1120,6 +1213,8 @@
         if (headings.length === 0 && headingText === pageTitle) continue;
         headings.push({ level: m[1].length, text: headingText, charIndex: -1 });
       }
+      // heading 텍스트 집합을 미리 구성 — numbered list 제거 시 heading과의 충돌 방지용
+      const headingTextSet = new Set(headings.map(h => h.text));
 
       // ─── 2. text 포맷 → 본문 정제 ────────────────────────────────────
       // Jina 헤더 블록 제거
@@ -1150,12 +1245,12 @@
         if (/^([….]{1,3}\s*more|see more|show more|load more|view more)$/i.test(t)) continue;
         if (/^>+\s*/.test(t)) { const inner = t.replace(/^>+\s*/, '').trim(); if (inner) step1.push(inner); continue; }
         if (/^[-+]\s+/.test(t)) { step1.push(t.replace(/^[-+]\s+/, '')); continue; }
-        if (/^\d+\.\s+/.test(t)) { step1.push(t.replace(/^\d+\.\s+/, '')); continue; }
+        // heading과 일치하는 numbered line은 prefix 제거 금지 (resolveHeadingPositions 탐색 대상)
+        if (/^\d+\.\s+/.test(t)) { step1.push(headingTextSet.has(t) ? t : t.replace(/^\d+\.\s+/, '')); continue; }
         step1.push(t);
       }
 
       // 2차: 반복 출현 메타데이터 제거 (헤딩 보호)
-      const headingTextSet = new Set(headings.map(h => h.text));
       const freq = new Map();
       for (const line of step1) freq.set(line, (freq.get(line) || 0) + 1);
       const step2 = step1.filter(line => {
@@ -1274,21 +1369,21 @@
       }
 
       let cleanedText = result.join('\n')
-          .replace(/([가-힣])\s+(<[^>]+>)/g, '$1$2')
-          .replace(/<[^>]+>/g, '')
-          .replace(/([가-힣])\s(==[^=\n]+==)/g, '$1$2')
-          .replace(/==([^=\n]+)==/g, '$1')
-          .replace(/([가-힣])\s(\*\*[^*\n]+\*\*)/g, '$1$2')
-          .replace(/([가-힣])\s(\*[^*\n]+\*)/g, '$1$2')
-          .replace(/([가-힣])\s(__[^_\n]+__)/g, '$1$2')
-          .replace(/([가-힣])\s(_[^_\n]+_)/g, '$1$2')
-          .replace(/\*\*/g, '')
-          .replace(/\*([^*\n]+)\*/g, '$1')
-          .replace(/__([^_\n]+)__/g, '$1')
-          .replace(/_([^_\n]+)_/g, '$1')
-          .replace(/~~[^~\n]+~~/g, '')
-          .replace(/`([^`\n]+)`/g, '$1')
-          .trim();
+        .replace(/([가-힣])\s+(<[^>]+>)/g, '$1$2')
+        .replace(/<[^>]+>/g, '')
+        .replace(/([가-힣])\s(==[^=\n]+==)/g, '$1$2')
+        .replace(/==([^=\n]+)==/g, '$1')
+        .replace(/([가-힣])\s(\*\*[^*\n]+\*\*)/g, '$1$2')
+        .replace(/([가-힣])\s(\*[^*\n]+\*)/g, '$1$2')
+        .replace(/([가-힣])\s(__[^_\n]+__)/g, '$1$2')
+        .replace(/([가-힣])\s(_[^_\n]+_)/g, '$1$2')
+        .replace(/\*\*/g, '')
+        .replace(/\*([^*\n]+)\*/g, '$1')
+        .replace(/__([^_\n]+)__/g, '$1')
+        .replace(/_([^_\n]+)_/g, '$1')
+        .replace(/~~[^~\n]+~~/g, '')
+        .replace(/`([^`\n]+)`/g, '$1')
+        .trim();
       // 페이지 제목이 본문 첫 줄에 중복될 경우 제거
       if (pageTitle && cleanedText.split('\n')[0]?.trim() === pageTitle) {
         cleanedText = cleanedText.slice(cleanedText.indexOf('\n') + 1).replace(/^\n+/, '').trim();
@@ -1307,36 +1402,64 @@
       if (type === 'loading') {
         wrap.style.display = '';
       } else {
-        // ok/err: 100% 채운 뒤 잠깐 후 숨김
+        // ok/err: 100%로 부드럽게 이동 후 숨김
         snapProg(100);
-        setTimeout(() => { wrap.style.display = 'none'; snapProg(0); }, 600);
+        setTimeout(() => { wrap.style.display = 'none'; resetProg(); }, 800);
       }
     }
 
     // ─── Progress animation ───────────────────────────────────────────────────────
-    let _progRaf = null;
+    // 2-layer: _progTarget은 천천히 크립, _progCur은 lerp로 target 추적
+    // 값이 급격히 바뀌어도 display는 항상 부드럽게 이동
+    let _progDisplayRaf = null; // display lerp 루프
+    let _progCreepRaf = null;   // target 크립 루프
     let _progCur = 0;
+    let _progTarget = 0;
 
-    // ease-out cubic: 빠르게 시작 → 목표에 가까워질수록 감속
-    function animateProg(from, to, durationMs) {
-      if (_progRaf) { cancelAnimationFrame(_progRaf); _progRaf = null; }
-      _progCur = from;
-      const startTime = performance.now();
-      function tick(now) {
-        const t = Math.min((now - startTime) / durationMs, 1);
-        const eased = 1 - Math.pow(1 - t, 3);
-        _progCur = from + (to - from) * eased;
-        document.getElementById('fetch-progress-bar').style.width = _progCur + '%';
-        if (t < 1) _progRaf = requestAnimationFrame(tick);
+    function _progDisplayTick() {
+      const diff = _progTarget - _progCur;
+      if (Math.abs(diff) > 0.05) {
+        _progCur += diff * 0.07; // lerp — 남은 거리의 7%씩 이동 (ease-out 효과)
+      } else {
+        _progCur = _progTarget;
       }
-      _progRaf = requestAnimationFrame(tick);
+      document.getElementById('fetch-progress-bar').style.width = _progCur + '%';
+      _progDisplayRaf = Math.abs(_progTarget - _progCur) > 0.02
+        ? requestAnimationFrame(_progDisplayTick)
+        : null;
     }
 
-    // 애니메이션 중단 후 즉시 특정 값으로 점프
+    function _kickDisplay() {
+      if (!_progDisplayRaf) _progDisplayRaf = requestAnimationFrame(_progDisplayTick);
+    }
+
+    // target을 ease-out으로 천천히 `to`까지 크립 → display가 lerp로 따라옴
+    function animateProg(to, durationMs) {
+      if (_progCreepRaf) { cancelAnimationFrame(_progCreepRaf); _progCreepRaf = null; }
+      const startTarget = _progTarget;
+      const t0 = performance.now();
+      function creep(now) {
+        const t = Math.min((now - t0) / durationMs, 1);
+        _progTarget = startTarget + (to - startTarget) * (1 - Math.pow(1 - t, 3));
+        _kickDisplay();
+        if (t < 1) _progCreepRaf = requestAnimationFrame(creep);
+      }
+      _progCreepRaf = requestAnimationFrame(creep);
+    }
+
+    // target을 즉시 변경 → display는 lerp로 부드럽게 따라옴
     function snapProg(pct) {
-      if (_progRaf) { cancelAnimationFrame(_progRaf); _progRaf = null; }
-      _progCur = pct;
-      document.getElementById('fetch-progress-bar').style.width = pct + '%';
+      if (_progCreepRaf) { cancelAnimationFrame(_progCreepRaf); _progCreepRaf = null; }
+      _progTarget = pct;
+      _kickDisplay();
+    }
+
+    // 완전 초기화 (bar 숨김 시 사용)
+    function resetProg() {
+      if (_progCreepRaf) { cancelAnimationFrame(_progCreepRaf); _progCreepRaf = null; }
+      if (_progDisplayRaf) { cancelAnimationFrame(_progDisplayRaf); _progDisplayRaf = null; }
+      _progCur = 0; _progTarget = 0;
+      document.getElementById('fetch-progress-bar').style.width = '0%';
     }
 
 
@@ -2141,14 +2264,19 @@
       _tocNodes.forEach(node => {
         const item = document.createElement('div');
         item.className = 'toc-item';
-        item.style.paddingLeft = `${(node.level - 1) * 12 + 4}px`;
+        // 레벨별 텍스트 시작 위치를 일정하게 맞춤
+        // 토글 있는 항목: paddingLeft + toggle(16) + gap(3) = textPos
+        // 토글 없는 항목: paddingLeft = textPos
+        const TOGGLE_GAP = 19; // toggle 16px + flex gap 3px
+        const textPos = 18 + (node.level - 1) * 10;
+        item.style.paddingLeft = `${node.childCount > 0 ? textPos - TOGGLE_GAP : textPos}px`;
         node.el = item;
 
-        // 접기 버튼 (자식 있을 때만 실제 표시)
+        // 접기 버튼 (자식 있을 때만 표시)
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'toc-toggle-btn';
         toggleBtn.textContent = node.childCount > 0 ? '▾' : '';
-        toggleBtn.style.visibility = node.childCount > 0 ? '' : 'hidden';
+        toggleBtn.style.display = node.childCount > 0 ? '' : 'none';
         node.toggleEl = toggleBtn;
 
         const textSpan = document.createElement('span');
@@ -2558,9 +2686,11 @@
       const editBtn = document.getElementById('loop-edit-btn');
       const exitBtn = document.getElementById('loop-exit-btn');
 
+      const ctrlHint = document.getElementById('ctrl-r-hint');
       if (loopMode) {
         selectBtn.style.display = 'none';
         hint.style.display = 'none';
+        if (ctrlHint) ctrlHint.style.display = 'none';
         const total = _loopCount === 0 ? '∞' : String(_loopCount);
         roundInfo.textContent = `${_loopRound} / ${total}`;
         roundInfo.style.display = '';
@@ -2568,6 +2698,7 @@
         exitBtn.style.display = '';
         return;
       }
+      if (ctrlHint) ctrlHint.style.display = '';
       roundInfo.style.display = 'none';
       editBtn.style.display = 'none';
       exitBtn.style.display = 'none';
