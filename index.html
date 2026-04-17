@@ -320,7 +320,10 @@
 
     /* ── TOC sidebar ──────────────────────────────────────────────────── */
     #typing-main.toc-open {
-      padding-right: 220px;
+      padding-right: 208px;
+    }
+    #typing-header.toc-open {
+      padding-right: 208px;
     }
 
     /* 커스텀 스크롤바 — 사이트 톤앤매너 (인디고, 얇게) */
@@ -2251,6 +2254,7 @@
       if (!valid.length) {
         panel.style.display = 'none';
         document.getElementById('typing-main').classList.remove('toc-open');
+        document.getElementById('typing-header').classList.remove('toc-open');
         btn.style.display = 'none';
         return;
       }
@@ -2327,6 +2331,7 @@
       if (_tocOpen) {
         panel.style.display = '';
         document.getElementById('typing-main').classList.add('toc-open');
+        document.getElementById('typing-header').classList.add('toc-open');
       }
     }
 
@@ -2352,6 +2357,7 @@
       if (!hasHeadings) return;
       panel.style.display = open ? '' : 'none';
       document.getElementById('typing-main').classList.toggle('toc-open', open);
+      document.getElementById('typing-header').classList.toggle('toc-open', open);
     }
 
     function scrollToHeading(charIdx) {
@@ -2491,6 +2497,7 @@
         // 구간반복 재시작 — TOC 숨김
         document.getElementById('toc-panel').style.display = 'none';
         document.getElementById('typing-main').classList.remove('toc-open');
+        document.getElementById('typing-header').classList.remove('toc-open');
         document.getElementById('toc-toggle-btn').style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'instant' });
         showScreen('s-typing');
@@ -2752,6 +2759,7 @@
       // 구간반복 중 TOC 숨김 (chars[]가 부분 텍스트라 인덱스 불일치)
       document.getElementById('toc-panel').style.display = 'none';
       document.getElementById('typing-main').classList.remove('toc-open');
+      document.getElementById('typing-header').classList.remove('toc-open');
       document.getElementById('toc-toggle-btn').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'instant' });
       refocus();
