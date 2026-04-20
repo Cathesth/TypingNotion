@@ -1194,7 +1194,9 @@
         document.getElementById('preview-ta').value = fetchedText;
         document.getElementById('preview-wrap').style.display = '';
         const cnt = fetchedText.split('\n').filter(l => l.trim()).length;
-        setFetchStatus('ok', `✓ ${cnt}개 단락 추출됨`);
+        const tocCnt = fetchedHeadings.length;
+        const tocStr = tocCnt > 0 ? ` · ${tocCnt}개 목차 추출됨` : '';
+        setFetchStatus('ok', `✓ ${cnt}개 단락 추출됨${tocStr}`);
       } catch (e) {
         if (e.name === 'AbortError') { resetProg(); return; }
         setFetchStatus('err', e.message || '불러오기에 실패했습니다.');
@@ -1246,8 +1248,15 @@
       for (const line of mdRaw.split('\n')) {
         const m = line.match(/^(#{1,6})[ \t]+(.+)/);
         if (!m) continue;
-        const headingText = m[2].replace(/\*\*/g, '').replace(/~~[^~]+~~/g, '').trim();
-        if (!headingText || /^~~.*~~$/.test(m[2].trim())) continue;
+        const headingText = m[2]
+          .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+          .replace(/(?<!\*)\*(?!\*)([^*\n]+)\*(?!\*)/g, '$1')
+          .replace(/~~[^~\n]+~~/g, '')
+          .replace(/==([^=\n]+)==/g, '$1')
+          .replace(/`([^`\n]+)`/g, '$1')
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          .trim();
+        if (!headingText) continue;
         // 페이지 제목과 동일한 첫 번째 헤딩은 목차에서 제외
         if (headings.length === 0 && headingText === pageTitle) continue;
         headings.push({ level: m[1].length, text: headingText, charIndex: -1 });
