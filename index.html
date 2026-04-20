@@ -487,7 +487,7 @@
       <div class="flex items-center justify-between mb-2">
         <div>
           <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span
-              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.5</span>
+              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.6</span>
           </h1>
           <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
             If you find this useful, please
@@ -1925,7 +1925,7 @@
       let cnt = 0;
       while (cursorIdx < chars.length) {
         const ch = chars[cursorIdx].char;
-        if (ch === ' ' || (getCharType(ch) !== chunkType && !isSkippable(ch))) break;
+        if (ch === '\n' || ch === ' ' || (getCharType(ch) !== chunkType && !isSkippable(ch))) break;
         chars[cursorIdx].skipGroup = groupId;
         restoreContent(cursorIdx);
         totalTyped++;
