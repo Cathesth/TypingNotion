@@ -487,7 +487,7 @@
       <div class="flex items-center justify-between mb-2">
         <div>
           <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span
-              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.6</span>
+              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.6.1</span>
           </h1>
           <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
             If you find this useful, please
@@ -1919,6 +1919,22 @@
       const startCh = chars[cursorIdx].char;
       if (startCh === ' ') return;
       startTimerIfNeeded();
+      // 줄바꿈(들)에서 스페이스바 → 연속된 줄바꿈 모두 스킵 후 종료
+      if (startCh === '\n') {
+        const groupId = _skipGroupCounter;
+        while (cursorIdx < chars.length && chars[cursorIdx].char === '\n') {
+          chars[cursorIdx].skipGroup = groupId;
+          restoreContent(cursorIdx);
+          totalTyped++; correctTyped++;
+          applyState(cursorIdx, 'skipped');
+          cursorIdx++;
+        }
+        _skipGroupCounter++;
+        if (cursorIdx < chars.length) { applyState(cursorIdx, 'cursor'); scrollCursor(); }
+        updateStats();
+        if (cursorIdx >= chars.length) setTimeout(showResults, 450);
+        return;
+      }
       const chunkType = getCharType(startCh);
 
       const groupId = _skipGroupCounter;
@@ -1944,9 +1960,8 @@
 
       if (cnt === 0) return;
 
-      // 덩어리 스킵 후 바로 이어지는 공백도 함께 스킵 (같은 그룹으로 묶음)
-      // ex) "목록,⏵위치" → 쉬표 스킵 후 스페이스도 자동 처리
-      if (cursorIdx < chars.length && chars[cursorIdx].char === ' ') {
+      // 덩어리 스킵 후 바로 이어지는 공백/줄바꿈도 함께 스킵 (연속 줄바꿈 전부 처리)
+      while (cursorIdx < chars.length && (chars[cursorIdx].char === ' ' || chars[cursorIdx].char === '\n')) {
         chars[cursorIdx].skipGroup = groupId;
         restoreContent(cursorIdx);
         totalTyped++;
