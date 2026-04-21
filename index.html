@@ -126,6 +126,15 @@
       }
     }
 
+    /* ── 타이머 일시정지 ──────────────────────────────────────────────────── */
+    #st-time.timer-paused {
+      color: #a1a1aa;
+      transition: color 0.3s;
+    }
+    .dark #st-time.timer-paused {
+      color: #52525b;
+    }
+
     /* ── IME composing ─────────────────────────────────────────────────── */
     /* shown while the user is building a Korean syllable */
     .ch-composing {
@@ -316,12 +325,33 @@
       outline-color: rgba(129, 140, 248, .6);
     }
 
-    /* 커스텀 스크롤바 — 사이트 톤앤매너 (인디고, 얇게) */
+    /* 메인 페이지 스크롤바 — zinc 톤, 5px, 둥근 트랙 */
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: #d4d4d8 #f4f4f5;
+    }
+    html::-webkit-scrollbar { width: 5px; }
+    html::-webkit-scrollbar-track {
+      background: #f4f4f5;
+      border-radius: 999px;
+    }
+    html::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 999px;
+    }
+    html::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+
+    html.dark { scrollbar-color: #52525b #27272a; }
+    html.dark::-webkit-scrollbar-track { background: #27272a; }
+    html.dark::-webkit-scrollbar-thumb { background: #52525b; }
+    html.dark::-webkit-scrollbar-thumb:hover { background: #71717a; }
+
+    /* TOC · 직접입력 · 미리보기 스크롤바 — 인디고 톤, 3px, 미니멀 */
     #toc-panel,
     #source-ta,
     #preview-ta {
       scrollbar-width: thin;
-      scrollbar-color: rgba(99, 102, 241, .18) transparent;
+      scrollbar-color: rgba(99, 102, 241, .22) transparent;
     }
 
     #toc-panel::-webkit-scrollbar,
@@ -339,26 +369,26 @@
     #toc-panel::-webkit-scrollbar-thumb,
     #source-ta::-webkit-scrollbar-thumb,
     #preview-ta::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, .18);
+      background: rgba(99, 102, 241, .22);
       border-radius: 2px;
     }
 
     #toc-panel::-webkit-scrollbar-thumb:hover,
     #source-ta::-webkit-scrollbar-thumb:hover,
     #preview-ta::-webkit-scrollbar-thumb:hover {
-      background: rgba(99, 102, 241, .38);
+      background: rgba(99, 102, 241, .45);
     }
 
     .dark #toc-panel::-webkit-scrollbar-thumb,
     .dark #source-ta::-webkit-scrollbar-thumb,
     .dark #preview-ta::-webkit-scrollbar-thumb {
-      background: rgba(129, 140, 248, .2);
+      background: rgba(129, 140, 248, .22);
     }
 
     .dark #toc-panel::-webkit-scrollbar-thumb:hover,
     .dark #source-ta::-webkit-scrollbar-thumb:hover,
     .dark #preview-ta::-webkit-scrollbar-thumb:hover {
-      background: rgba(129, 140, 248, .42);
+      background: rgba(129, 140, 248, .48);
     }
 
     .toc-item {
@@ -487,7 +517,7 @@
       <div class="flex items-center justify-between mb-2">
         <div>
           <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span
-              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.6.1</span>
+              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.7.0</span>
           </h1>
           <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
             If you find this useful, please
@@ -1782,6 +1812,8 @@
     let totalTyped = 0;
     let correctTyped = 0;
     let _timerInterval = null;
+    let _lastActivityAt = null;  // 마지막 입력 시각
+    let _pausedDuration = 0;     // 누적 일시정지 시간 (ms)
     let isComposing = false;
     let justComposed = false;
     let spaceQueued = false; // 한글 조합 중/직후 스페이스 누름 대기
@@ -1798,6 +1830,7 @@
       totalTyped = 0; correctTyped = 0; errorLog = [];
       isComposing = false; justComposed = false; spaceQueued = false;
       _lastKeyWasBackspace = false; _skipGroupCounter = 0;
+      _lastActivityAt = null; _pausedDuration = 0;
       if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
       document.getElementById('st-time').textContent = '—';
       hiddenInp.value = '';
@@ -1870,21 +1903,45 @@
       c.el.textContent = data || c.char;
     }
 
+    const IDLE_PAUSE_MS = 5000;
+
+    function recordActivity() {
+      const now = performance.now();
+      if (_lastActivityAt !== null && now - _lastActivityAt > IDLE_PAUSE_MS) {
+        _pausedDuration += now - _lastActivityAt - IDLE_PAUSE_MS;
+      }
+      _lastActivityAt = now;
+    }
+
+    function getElapsedMs() {
+      if (!startTime) return 0;
+      const now = performance.now();
+      const idleSince = _lastActivityAt !== null ? now - _lastActivityAt : 0;
+      const currentPause = idleSince > IDLE_PAUSE_MS ? idleSince - IDLE_PAUSE_MS : 0;
+      return now - startTime - _pausedDuration - currentPause;
+    }
+
     function startTimerIfNeeded() {
       if (startTime) return;
       startTime = performance.now();
+      _lastActivityAt = startTime;
       _timerInterval = setInterval(() => {
         if (!startTime) return;
-        const s = Math.floor((performance.now() - startTime) / 1000);
+        const now = performance.now();
+        const paused = _lastActivityAt !== null && (now - _lastActivityAt) > IDLE_PAUSE_MS;
+        const ms = getElapsedMs();
+        const s = Math.floor(ms / 1000);
         const m = Math.floor(s / 60);
-        document.getElementById('st-time').textContent =
-          m > 0 ? `${m}:${String(s % 60).padStart(2, '0')}` : `${s}s`;
-      }, 1000);
+        const el = document.getElementById('st-time');
+        el.textContent = m > 0 ? `${m}:${String(s % 60).padStart(2, '0')}` : `${s}s`;
+        el.classList.toggle('timer-paused', paused);
+      }, 500);
     }
 
     // ─── Type a character ─────────────────────────────────────────────────────────
     function typeChar(key) {
       if (cursorIdx >= chars.length) return;
+      recordActivity();
       startTimerIfNeeded();
 
       const expected = chars[cursorIdx].char;
@@ -1918,6 +1975,7 @@
       if (cursorIdx >= chars.length) return;
       const startCh = chars[cursorIdx].char;
       if (startCh === ' ') return;
+      recordActivity();
       startTimerIfNeeded();
       // 줄바꿈(들)에서 스페이스바 → 연속된 줄바꿈 모두 스킵 후 종료
       if (startCh === '\n') {
@@ -1987,6 +2045,7 @@
     // ─── Backspace ────────────────────────────────────────────────────────────────
     function backspace() {
       if (cursorIdx === 0) return;
+      recordActivity();
       if (cursorIdx < chars.length) applyState(cursorIdx, 'untyped');
       cursorIdx--;
 
@@ -2122,17 +2181,21 @@
       if (data) {
         const expected = cursorIdx < chars.length ? chars[cursorIdx].char : '';
 
-        // 자모만 있고 음절을 기대 중: 아직 조합 미완성
-        // 단, 백스페이스로 조합이 취소된 경우에는 커서만 복원 (자모 잔류 방지)
-        if (isJamoOnly(data) && hasKoreanSyllable(expected)) {
+        // 자음만 남은 채 조합 종료
+        if (isJamoOnly(data)) {
           if (_lastKeyWasBackspace) {
+            // 백스페이스로 조합 취소 — expected 타입 관계없이 자모 타이핑 금지
+            _lastKeyWasBackspace = false;
             applyState(cursorIdx, 'cursor');
-          } else {
-            showComposing(data);
+            setTimeout(() => { justComposed = false; spaceQueued = false; }, 50);
+            return;
           }
-          _lastKeyWasBackspace = false;
-          setTimeout(() => { justComposed = false; spaceQueued = false; }, 50);
-          return;
+          if (hasKoreanSyllable(expected)) {
+            // 한글 음절 위치에서 조합 미완성 — 계속 표시
+            showComposing(data);
+            setTimeout(() => { justComposed = false; spaceQueued = false; }, 50);
+            return;
+          }
         }
 
         _lastKeyWasBackspace = false;
@@ -2530,7 +2593,7 @@
 
       if (_timerInterval) { clearInterval(_timerInterval); _timerInterval = null; }
 
-      const elapsed = startTime ? performance.now() - startTime : 0;
+      const elapsed = getElapsedMs();
       const secs = Math.round(elapsed / 1000);
       const mins = elapsed / 60000;
       const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 100;
