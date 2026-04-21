@@ -131,6 +131,7 @@
       color: #a1a1aa;
       transition: color 0.3s;
     }
+
     .dark #st-time.timer-paused {
       color: #52525b;
     }
@@ -289,6 +290,31 @@
       cursor: grabbing;
     }
 
+    .quick-limit-marker {
+      display: inline-block;
+      position: relative;
+      color: #ef4444;
+      font-weight: 700;
+      font-size: 1em;
+      user-select: none;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .quick-limit-marker::after {
+      content: ' 빠른연습 300자 제한';
+      position: absolute;
+      top: -1.5em;
+      left: 0;
+      font-size: 9px;
+      font-family: 'Pretendard', sans-serif;
+      font-weight: 600;
+      color: #ef4444;
+      white-space: nowrap;
+      line-height: 1;
+      pointer-events: none;
+    }
+
     .dark .loop-marker {
       color: #818cf8;
     }
@@ -330,21 +356,71 @@
       scrollbar-width: thin;
       scrollbar-color: #d4d4d8 #f4f4f5;
     }
-    html::-webkit-scrollbar { width: 5px; }
+
+    html::-webkit-scrollbar {
+      width: 5px;
+    }
+
     html::-webkit-scrollbar-track {
       background: #f4f4f5;
       border-radius: 999px;
     }
+
     html::-webkit-scrollbar-thumb {
       background: #d4d4d8;
       border-radius: 999px;
     }
-    html::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
 
-    html.dark { scrollbar-color: #52525b #27272a; }
-    html.dark::-webkit-scrollbar-track { background: #27272a; }
-    html.dark::-webkit-scrollbar-thumb { background: #52525b; }
-    html.dark::-webkit-scrollbar-thumb:hover { background: #71717a; }
+    html::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    html.dark {
+      scrollbar-color: #52525b #27272a;
+    }
+
+    html.dark::-webkit-scrollbar-track {
+      background: #27272a;
+    }
+
+    html.dark::-webkit-scrollbar-thumb {
+      background: #52525b;
+    }
+
+    html.dark::-webkit-scrollbar-thumb:hover {
+      background: #71717a;
+    }
+
+    /* 빠른 연습 팝업 스크롤바 — zinc 톤, 3px, 미니멀 */
+    #quick-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(161, 161, 170, .35) transparent;
+    }
+
+    #quick-scroll::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    #quick-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #quick-scroll::-webkit-scrollbar-thumb {
+      background: rgba(161, 161, 170, .35);
+      border-radius: 2px;
+    }
+
+    #quick-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(113, 113, 122, .6);
+    }
+
+    .dark #quick-scroll::-webkit-scrollbar-thumb {
+      background: rgba(82, 82, 91, .45);
+    }
+
+    .dark #quick-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(113, 113, 122, .7);
+    }
 
     /* TOC · 직접입력 · 미리보기 스크롤바 — 인디고 톤, 3px, 미니멀 */
     #toc-panel,
@@ -472,6 +548,98 @@
       color: #818cf8;
     }
 
+    /* ── Patch note popover ───────────────────────────────────────────────── */
+    #patch-popover {
+      position: fixed;
+      z-index: 9999;
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 10px;
+      padding: 12px 14px;
+      min-width: 272px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.10);
+      font-family: 'Pretendard', sans-serif;
+      pointer-events: auto;
+    }
+
+    html.dark #patch-popover {
+      background: #18181b;
+      border-color: #3f3f46;
+      box-shadow: 0 6px 24px rgba(0,0,0,.40);
+    }
+
+    .patch-ver-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
+    }
+
+    .patch-ver-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #3f3f46;
+      letter-spacing: .02em;
+    }
+
+    html.dark .patch-ver-label { color: #d4d4d8; }
+
+    .patch-ver-current .patch-ver-label { color: #18181b; }
+    html.dark .patch-ver-current .patch-ver-label { color: #fafafa; }
+
+    .patch-item {
+      display: flex;
+      align-items: baseline;
+      gap: 0;
+      font-size: 11px;
+      line-height: 1.85;
+    }
+
+    .patch-item-prefix {
+      flex-shrink: 0;
+      width: 14px;
+      font-family: ui-monospace, monospace;
+      font-size: 11px;
+    }
+
+    .patch-add .patch-item-prefix { color: #6366f1; }
+    html.dark .patch-add .patch-item-prefix { color: #818cf8; }
+    .patch-add .patch-item-text { color: #6366f1; }
+    html.dark .patch-add .patch-item-text { color: #818cf8; }
+
+    .patch-fix .patch-item-prefix { color: #f59e0b; }
+    html.dark .patch-fix .patch-item-prefix { color: #fbbf24; }
+    .patch-fix .patch-item-text { color: #f59e0b; }
+    html.dark .patch-fix .patch-item-text { color: #fbbf24; }
+
+    .patch-divider {
+      border: none;
+      border-top: 1px solid #f4f4f5;
+      margin: 8px 0;
+    }
+
+    html.dark .patch-divider { border-top-color: #27272a; }
+
+    #patch-older-toggle {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 10px;
+      color: #a1a1aa;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: color .12s;
+    }
+
+    #patch-older-toggle:hover { color: #6366f1; }
+    html.dark #patch-older-toggle:hover { color: #818cf8; }
+
+    .patch-older-section { margin-top: 8px; }
+    .patch-older-block { margin-bottom: 8px; }
+
     .toc-start-btn {
       display: none;
       flex-shrink: 0;
@@ -517,7 +685,8 @@
       <div class="flex items-center justify-between mb-2">
         <div>
           <h1 class="text-xl font-bold text-zinc-800 dark:text-zinc-200 tracking-tight">TypingNotion<span
-              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle">v1.2.7.0</span>
+              id="version-badge"
+              class="font-normal text-xs text-zinc-400 dark:text-zinc-600 ml-2 tracking-normal align-middle cursor-default select-none">v1.3.0.0</span>
           </h1>
           <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">
             If you find this useful, please
@@ -606,7 +775,7 @@
                 <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
                   <span class="text-indigo-400 font-semibold">01</span> 공유 버튼 클릭
                 </p>
-                <img src="https://github.com/user-attachments/assets/a7b7619a-81c3-4e1e-a008-a0d200d59a71"
+                <img src="https://github.com/user-attachments/assets/699ff440-f011-4937-8ddd-70b45829cb6b"
                   alt="공유 버튼 클릭" class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
               </div>
               <!-- Step 2 -->
@@ -614,7 +783,7 @@
                 <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
                   <span class="text-indigo-400 font-semibold">02</span> 게시 탭으로 이동
                 </p>
-                <img src="https://github.com/user-attachments/assets/8362668f-3ad2-4ff7-b430-724b7ad21d92" alt="게시 탭 이동"
+                <img src="https://github.com/user-attachments/assets/edf6f03a-470d-40f9-b7fa-03438a808c15" alt="게시 탭 이동"
                   class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
               </div>
               <!-- Step 3 -->
@@ -622,7 +791,7 @@
                 <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
                   <span class="text-indigo-400 font-semibold">03</span> 게시 버튼 클릭
                 </p>
-                <img src="https://github.com/user-attachments/assets/472f40b4-6dbc-4d6d-bc5a-efc72ef4d22b"
+                <img src="https://github.com/user-attachments/assets/81b8fa89-4518-4df6-b5b6-3b4650521c38"
                   alt="게시 버튼 클릭" class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
               </div>
               <!-- Step 4 -->
@@ -630,7 +799,7 @@
                 <p class="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
                   <span class="text-indigo-400 font-semibold">04</span> 주소 복사 후 붙여넣기
                 </p>
-                <img src="https://github.com/user-attachments/assets/27103dfb-3e76-40a9-abf3-ba1ea588a1c0" alt="주소 복사"
+                <img src="https://github.com/user-attachments/assets/52b91747-c651-416a-b94f-2f29690cc358" alt="주소 복사"
                   class="w-full rounded-lg border border-zinc-100 dark:border-zinc-800">
               </div>
             </div>
@@ -705,6 +874,8 @@
         <!-- 구간반복 진입 버튼 (루프 모드 아닐 때) -->
         <button id="loop-select-btn" onclick="enterLoopSelectMode()" class="font-mono text-[10px] text-zinc-400 hover:text-zinc-700
                dark:hover:text-zinc-300 transition-colors whitespace-nowrap shrink-0">구간반복</button>
+        <button id="quick-select-btn" onclick="enterQuickSelectMode()" class="font-mono text-[10px] text-zinc-400 hover:text-indigo-500
+               dark:hover:text-indigo-400 transition-colors whitespace-nowrap shrink-0">빠른 연습</button>
 
         <!-- 선택 모드 안내 (클릭 중) -->
         <span id="loop-select-hint" style="display:none"
@@ -967,6 +1138,33 @@
   </div>
 
   <!-- ══════════════════════════════════════════════
+     QUICK PRACTICE POPUP
+══════════════════════════════════════════════ -->
+  <div id="quick-popup" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center"
+    onclick="if(event.target===this||event.target.id==='quick-backdrop')closeQuickPractice();event.stopPropagation()">
+    <div id="quick-backdrop" class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+    <div class="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+      <!-- header -->
+      <div class="flex items-center justify-between px-5 py-3 border-b border-zinc-100 dark:border-zinc-800">
+        <span class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 select-none">빠른 연습 · ∞</span>
+        <button onclick="closeQuickPractice()"
+          class="font-mono text-[11px] text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+          닫기
+        </button>
+      </div>
+      <!-- text display -->
+      <div id="quick-scroll" class="px-7 py-6 max-h-96 overflow-y-auto">
+        <div id="quick-display"
+          style="font-family:'Pretendard',sans-serif;font-size:1.05rem;line-height:2.4;word-break:break-word;user-select:none">
+        </div>
+      </div>
+      <!-- hidden input for key capture -->
+      <input id="quick-inp" class="sr-only" autocomplete="off" autocorrect="off" autocapitalize="off"
+        spellcheck="false">
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
      SCRIPT
 ══════════════════════════════════════════════ -->
   <script>
@@ -1010,6 +1208,146 @@
       });
       document.addEventListener('mousedown', hide);
       document.addEventListener('scroll', hide, true);
+    })();
+
+    // ─── Patch note popover ───────────────────────────────────────────────────────
+    (function () {
+      const NOTES = [
+        {
+          ver: 'v1.3.0.0', current: true,
+          items: [
+            { type: 'add', text: '빠른 연습 — 구간 선택 후 300자 무한 반복 연습 팝업' },
+            { type: 'add', text: '타이머 자동 일시정지 — 5초 무입력 시 멈춤' },
+            { type: 'fix', text: '줄바꿈 스페이스바 스킵 버그 수정' },
+            { type: 'fix', text: '한글 자음 잔류 버그 수정' },
+          ]
+        },
+        {
+          ver: 'v1.2.0.0',
+          items: [
+            { type: 'add', text: '구간 반복(Loop) 모드' },
+            { type: 'add', text: '반복 범위 드래그 수정 지원' },
+          ]
+        },
+        {
+          ver: 'v1.1.0.0',
+          items: [
+            { type: 'add', text: '노션 URL 직접 불러오기' },
+            { type: 'add', text: '스페이스바 스킵 설정 (기호 / 영어만 / 한글만)' },
+            { type: 'add', text: '목차(TOC) — 헤딩 클릭 이동, 여기서 시작' },
+          ]
+        },
+        {
+          ver: 'v1.0.0.0',
+          items: [
+            { type: 'add', text: '첫 출시' },
+          ]
+        },
+      ];
+
+      function addPatchItem(parent, it) {
+        const d = document.createElement('div');
+        d.className = 'patch-item ' + (it.type === 'add' ? 'patch-add' : 'patch-fix');
+        const prefix = document.createElement('span');
+        prefix.className = 'patch-item-prefix';
+        prefix.textContent = it.type === 'add' ? '+' : '-';
+        const text = document.createElement('span');
+        text.className = 'patch-item-text';
+        text.textContent = ' ' + it.text;
+        d.appendChild(prefix);
+        d.appendChild(text);
+        parent.appendChild(d);
+      }
+
+      function buildPopover() {
+        const pop = document.createElement('div');
+        pop.id = 'patch-popover';
+        pop.style.display = 'none';
+
+        // 최신 버전
+        const cur = NOTES[0];
+        const curBlock = document.createElement('div');
+        curBlock.className = 'patch-ver-current';
+        const curRow = document.createElement('div');
+        curRow.className = 'patch-ver-row';
+        const curLabel = document.createElement('span');
+        curLabel.className = 'patch-ver-label';
+        curLabel.textContent = cur.ver;
+        curRow.appendChild(curLabel);
+        curBlock.appendChild(curRow);
+        cur.items.forEach(it => addPatchItem(curBlock, it));
+        pop.appendChild(curBlock);
+
+        // 구분선 + 이전 버전 토글
+        const hr = document.createElement('hr');
+        hr.className = 'patch-divider';
+        pop.appendChild(hr);
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.id = 'patch-older-toggle';
+        toggleBtn.innerHTML = '이전 버전 <span id="patch-older-arrow">▾</span>';
+        pop.appendChild(toggleBtn);
+
+        // 이전 버전 목록
+        const olderSec = document.createElement('div');
+        olderSec.className = 'patch-older-section';
+        olderSec.style.display = 'none';
+        NOTES.slice(1).forEach((note, ni) => {
+          const block = document.createElement('div');
+          block.className = 'patch-older-block';
+          if (ni > 0) {
+            const sep = document.createElement('hr');
+            sep.className = 'patch-divider';
+            block.appendChild(sep);
+          }
+          const row = document.createElement('div');
+          row.className = 'patch-ver-row';
+          const label = document.createElement('span');
+          label.className = 'patch-ver-label';
+          label.textContent = note.ver;
+          row.appendChild(label);
+          block.appendChild(row);
+          note.items.forEach(it => addPatchItem(block, it));
+          olderSec.appendChild(block);
+        });
+        pop.appendChild(olderSec);
+
+        toggleBtn.addEventListener('click', () => {
+          const open = olderSec.style.display !== 'none';
+          olderSec.style.display = open ? 'none' : '';
+          document.getElementById('patch-older-arrow').textContent = open ? '▾' : '▴';
+        });
+
+        document.body.appendChild(pop);
+        return pop;
+      }
+
+      const pop = buildPopover();
+      const badge = document.getElementById('version-badge');
+      let hideTimer = null;
+
+      function showPop() {
+        clearTimeout(hideTimer);
+        const r = badge.getBoundingClientRect();
+        pop.style.display = '';
+        // 위치: badge 왼쪽 아래
+        requestAnimationFrame(() => {
+          const pw = pop.offsetWidth;
+          let left = r.left;
+          if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+          pop.style.left = left + 'px';
+          pop.style.top = (r.bottom + 6) + 'px';
+        });
+      }
+
+      function hidePop() {
+        hideTimer = setTimeout(() => { pop.style.display = 'none'; }, 120);
+      }
+
+      badge.addEventListener('mouseenter', showPop);
+      badge.addEventListener('mouseleave', hidePop);
+      pop.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+      pop.addEventListener('mouseleave', hidePop);
     })();
 
     // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -2114,6 +2452,28 @@
       });
     }
 
+    let _rafQScroll = null;
+    function _quickScrollCursor() {
+      if (_quickCursorIdx >= _quickChars.length) return;
+      if (_rafQScroll !== null) cancelAnimationFrame(_rafQScroll);
+      _rafQScroll = requestAnimationFrame(() => {
+        _rafQScroll = null;
+        if (_quickCursorIdx >= _quickChars.length) return;
+        const el = _quickChars[_quickCursorIdx].el;
+        const container = document.getElementById('quick-scroll');
+        if (!container) return;
+        const cRect = container.getBoundingClientRect();
+        const eRect = el.getBoundingClientRect();
+        // 커서가 컨테이너 15%-75% 구간에 있으면 스크롤 생략
+        const relTop = eRect.top - cRect.top;
+        const relBottom = eRect.bottom - cRect.top;
+        const ch = cRect.height;
+        if (relTop >= ch * 0.15 && relBottom <= ch * 0.75) return;
+        const targetScrollTop = container.scrollTop + relTop - ch * 0.4;
+        container.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+      });
+    }
+
     let _rafStats = null;
     function updateStats() {
       if (_rafStats !== null) return; // 이미 다음 프레임 예약됨
@@ -2273,9 +2633,9 @@
       hiddenInp.value = '';
     });
 
-    // Keep focus (선택 모드 중에는 refocus 안 함 — text 클릭이 text-display 핸들러로 가야 함)
+    // Keep focus (선택 모드·퀵 모드 중에는 refocus 안 함)
     document.getElementById('s-typing').addEventListener('click', e => {
-      if (loopSelectMode) return;
+      if (loopSelectMode || _quickActive) return;
       if (!e.target.closest('button') && !e.target.closest('#settings-panel')) refocus();
     });
 
@@ -2653,6 +3013,315 @@
     }
     function onNewText() { _wasLoopSession = false; _pendingHeadings = []; _pendingTitle = ''; _pageTitle = ''; showScreen('s-input'); switchTab(lastTab); }
 
+    // ─── Quick Practice ───────────────────────────────────────────────────────────
+    const QUICK_MAX_CHARS = 300;
+    let _quickSelectMode = false;
+    let _quickActive = false;
+    let _quickChars = [];
+    let _quickCursorIdx = 0;
+    let _quickIsComposing = false;
+    let _quickJustComposed = false;
+    let _quickLastWasBackspace = false;
+    let _quickSkipGroupCounter = 0;
+
+    let _quickLimitMarkerEl = null;
+
+    function _placeQuickLimitMarker(startIdx) {
+      _removeQuickLimitMarker();
+      // 시작점부터 끝까지 300자 미만이면 마커 표시 불필요
+      if (chars.length - startIdx <= QUICK_MAX_CHARS) return;
+      const limitIdx = startIdx + QUICK_MAX_CHARS - 1;
+      const marker = document.createElement('span');
+      marker.className = 'quick-limit-marker';
+      marker.textContent = '」';
+      chars[limitIdx].el.insertAdjacentElement('afterend', marker);
+      _quickLimitMarkerEl = marker;
+    }
+
+    function _removeQuickLimitMarker() {
+      if (_quickLimitMarkerEl) { _quickLimitMarkerEl.remove(); _quickLimitMarkerEl = null; }
+    }
+
+    function enterQuickSelectMode() {
+      if (loopSelectMode || _quickSelectMode) return;
+      _quickSelectMode = true;
+      loopSelectMode = true;
+      loopSelectStep = 1;
+      _loopStartIdx = -1; _loopEndIdx = -1;
+      _startMarkerEl = null; _endMarkerEl = null;
+      document.querySelectorAll('.loop-marker').forEach(el => el.remove());
+      chars.forEach(c => c.el.classList.remove('ch-loop-range'));
+      document.getElementById('text-display').classList.add('loop-select-mode');
+      updateLoopSelectUI();
+    }
+
+    function _flashQuickLimitMarker() {
+      if (!_quickLimitMarkerEl) return;
+      const el = _quickLimitMarkerEl;
+      let count = 0;
+      const id = setInterval(() => {
+        el.style.opacity = count % 2 === 0 ? '0' : '1';
+        count++;
+        if (count >= 5) { clearInterval(id); el.style.opacity = ''; }
+      }, 160);
+    }
+
+    function _openQuickPracticeFromSelection() {
+      const text = chars.slice(_loopStartIdx, _loopEndIdx + 1).map(c => c.char).join('');
+      if (text.length > QUICK_MAX_CHARS) {
+        // 시작점 유지 — 끝 마커만 제거하고 step 2로 복귀
+        document.querySelectorAll('.loop-marker-end').forEach(el => el.remove());
+        _loopEndIdx = -1;
+        loopSelectStep = 2;
+        updateLoopSelectUI();
+        _flashQuickLimitMarker();
+        return;
+      }
+      _quickSelectMode = false;
+      cancelLoopSelect();
+      _openQuickPractice(text);
+    }
+
+    function _openQuickPractice(text) {
+      _quickActive = true;
+      _quickChars = [];
+      _quickCursorIdx = 0;
+      _quickIsComposing = false;
+      _quickJustComposed = false;
+      _quickLastWasBackspace = false;
+      _quickSkipGroupCounter = 0;
+      const display = document.getElementById('quick-display');
+      display.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      let lineDiv = document.createElement('div');
+      lineDiv.className = 'tl';
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'ch ch-untyped' + (ch === '\n' ? ' ch-nl' : '');
+        if (ch === '\n') {
+          span.textContent = '↵';
+          lineDiv.appendChild(span);
+          fragment.appendChild(lineDiv);
+          lineDiv = document.createElement('div');
+          lineDiv.className = 'tl';
+        } else {
+          if (ch === ' ') span.innerHTML = '&nbsp;';
+          else span.textContent = ch;
+          lineDiv.appendChild(span);
+        }
+        _quickChars.push({ char: ch, el: span, state: 'untyped' });
+      }
+      if (lineDiv.hasChildNodes()) fragment.appendChild(lineDiv);
+      display.appendChild(fragment);
+      _applyQState(0, 'cursor');
+      document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+      document.getElementById('quick-popup').style.display = 'flex';
+      const qi = document.getElementById('quick-inp');
+      qi.value = '';
+      qi.focus();
+    }
+
+    function closeQuickPractice() {
+      _quickActive = false;
+      _quickIsComposing = false;
+      document.body.style.overflow = '';
+      document.getElementById('quick-popup').style.display = 'none';
+      refocus();
+    }
+
+    function _applyQState(i, state) {
+      if (i < 0 || i >= _quickChars.length) return;
+      const c = _quickChars[i];
+      let cls = 'ch' + (c.char === '\n' ? ' ch-nl' : '');
+      if (state === 'cursor') cls += ' ch-cursor';
+      else if (state === 'correct') cls += ' ch-correct';
+      else if (state === 'incorrect') cls += ' ch-incorrect';
+      else if (state === 'skipped') cls += ' ch-skipped';
+      else if (state === 'composing') cls += ' ch-composing';
+      else cls += ' ch-untyped';
+      c.el.className = cls;
+      c.state = state;
+    }
+
+    function _qRestoreContent(i) {
+      if (i < 0 || i >= _quickChars.length) return;
+      const c = _quickChars[i];
+      if (c.char === '\n') c.el.textContent = '↵';
+      else if (c.char === ' ') c.el.innerHTML = '&nbsp;';
+      else c.el.textContent = c.char;
+    }
+
+    function _quickTypeChar(key) {
+      if (_quickCursorIdx >= _quickChars.length) return;
+      const c = _quickChars[_quickCursorIdx];
+      _qRestoreContent(_quickCursorIdx);
+      if (key === c.char) {
+        _applyQState(_quickCursorIdx, 'correct');
+      } else {
+        if (key === '\n') c.el.textContent = '↵';
+        else if (key === ' ') c.el.innerHTML = '&nbsp;';
+        else c.el.textContent = key;
+        _applyQState(_quickCursorIdx, 'incorrect');
+      }
+      _quickCursorIdx++;
+      if (_quickCursorIdx >= _quickChars.length) {
+        setTimeout(_quickReset, 350);
+      } else {
+        _applyQState(_quickCursorIdx, 'cursor');
+        _quickScrollCursor();
+      }
+    }
+
+    // 스페이스바 스킵 — 메인 skipChunk와 동일한 로직 (settings 공유)
+    function _quickSkipOrType() {
+      if (_quickCursorIdx >= _quickChars.length) return;
+      const startCh = _quickChars[_quickCursorIdx].char;
+      if (startCh === ' ') { _quickTypeChar(' '); return; }
+
+      const groupId = _quickSkipGroupCounter;
+
+      // 줄바꿈에서 → 연속 줄바꿈 모두 스킵
+      if (startCh === '\n') {
+        while (_quickCursorIdx < _quickChars.length && _quickChars[_quickCursorIdx].char === '\n') {
+          _quickChars[_quickCursorIdx].skipGroup = groupId;
+          _qRestoreContent(_quickCursorIdx);
+          _applyQState(_quickCursorIdx, 'skipped');
+          _quickCursorIdx++;
+        }
+        _quickSkipGroupCounter++;
+        if (_quickCursorIdx >= _quickChars.length) setTimeout(_quickReset, 350);
+        else { _applyQState(_quickCursorIdx, 'cursor'); _quickScrollCursor(); }
+        return;
+      }
+
+      const chunkType = getCharType(startCh);
+      let cnt = 0;
+      while (_quickCursorIdx < _quickChars.length) {
+        const ch = _quickChars[_quickCursorIdx].char;
+        if (ch === '\n' || ch === ' ' || (getCharType(ch) !== chunkType && !isSkippable(ch))) break;
+        _quickChars[_quickCursorIdx].skipGroup = groupId;
+        _qRestoreContent(_quickCursorIdx);
+        if (isSkippable(ch)) {
+          _applyQState(_quickCursorIdx, 'skipped');
+        } else {
+          _quickChars[_quickCursorIdx].el.textContent = ch;
+          _applyQState(_quickCursorIdx, 'incorrect');
+        }
+        _quickCursorIdx++;
+        cnt++;
+      }
+      if (cnt === 0) return;
+      // 뒤따르는 공백/줄바꿈 자동 스킵
+      while (_quickCursorIdx < _quickChars.length &&
+        (_quickChars[_quickCursorIdx].char === ' ' || _quickChars[_quickCursorIdx].char === '\n')) {
+        _quickChars[_quickCursorIdx].skipGroup = groupId;
+        _qRestoreContent(_quickCursorIdx);
+        _applyQState(_quickCursorIdx, 'skipped');
+        _quickCursorIdx++;
+      }
+      _quickSkipGroupCounter++;
+      if (_quickCursorIdx >= _quickChars.length) setTimeout(_quickReset, 350);
+      else { _applyQState(_quickCursorIdx, 'cursor'); _quickScrollCursor(); }
+    }
+
+    function _quickBs() {
+      if (_quickCursorIdx === 0) return;
+      if (_quickCursorIdx < _quickChars.length) _applyQState(_quickCursorIdx, 'untyped');
+      _quickCursorIdx--;
+
+      const prev = _quickChars[_quickCursorIdx];
+      if (prev.skipGroup !== undefined) {
+        const gid = prev.skipGroup;
+        let groupStart = _quickCursorIdx;
+        while (groupStart > 0 && _quickChars[groupStart - 1].skipGroup === gid) groupStart--;
+        for (let i = groupStart; i <= _quickCursorIdx; i++) {
+          _qRestoreContent(i);
+          _applyQState(i, 'untyped');
+          delete _quickChars[i].skipGroup;
+        }
+        _quickCursorIdx = groupStart;
+        _applyQState(_quickCursorIdx, 'cursor');
+        _quickScrollCursor();
+        return;
+      }
+
+      _qRestoreContent(_quickCursorIdx);
+      _applyQState(_quickCursorIdx, 'cursor');
+      _quickScrollCursor();
+    }
+
+    function _quickReset() {
+      _quickChars.forEach((c, i) => { _qRestoreContent(i); c.el.className = 'ch ch-untyped' + (c.char === '\n' ? ' ch-nl' : ''); c.state = 'untyped'; delete c.skipGroup; });
+      _quickCursorIdx = 0;
+      _quickIsComposing = false;
+      _quickJustComposed = false;
+      _quickLastWasBackspace = false;
+      _quickSkipGroupCounter = 0;
+      _applyQState(0, 'cursor');
+      const sc = document.getElementById('quick-scroll');
+      if (sc) sc.scrollTop = 0;
+      document.getElementById('quick-inp').focus();
+    }
+
+    // Quick practice input handlers
+    (function () {
+      const qi = document.getElementById('quick-inp');
+
+      // 팝업이 열려있을 때 포커스 유지 (스크롤 등으로 blur 발생 시 복원)
+      qi.addEventListener('blur', () => { if (_quickActive) setTimeout(() => { if (_quickActive) qi.focus(); }, 0); });
+
+      qi.addEventListener('compositionstart', () => { _quickIsComposing = true; });
+      qi.addEventListener('compositionupdate', e => {
+        if (!e.data || !_quickActive || _quickCursorIdx >= _quickChars.length) return;
+        const c = _quickChars[_quickCursorIdx];
+        _applyQState(_quickCursorIdx, 'composing');
+        c.el.textContent = e.data;
+      });
+      qi.addEventListener('compositionend', e => {
+        _quickIsComposing = false;
+        _quickJustComposed = true;
+        qi.value = '';
+        if (!_quickActive) return;
+        const data = e.data || '';
+        _qRestoreContent(_quickCursorIdx);
+        if (data) {
+          if (isJamoOnly(data) && _quickLastWasBackspace) {
+            _applyQState(_quickCursorIdx, 'cursor');
+          } else if (isJamoOnly(data) && _quickCursorIdx < _quickChars.length && hasKoreanSyllable(_quickChars[_quickCursorIdx].char)) {
+            _applyQState(_quickCursorIdx, 'composing');
+            _quickChars[_quickCursorIdx].el.textContent = data;
+          } else {
+            for (const ch of data) _quickTypeChar(ch);
+          }
+        } else {
+          _applyQState(_quickCursorIdx, 'cursor');
+        }
+        _quickLastWasBackspace = false;
+        setTimeout(() => { _quickJustComposed = false; }, 50);
+      });
+      qi.addEventListener('keydown', e => {
+        if (!_quickActive) return;
+        if (e.key === 'Escape') { e.preventDefault(); closeQuickPractice(); return; }
+        _quickLastWasBackspace = (e.key === 'Backspace');
+        if (_quickIsComposing) return;
+        if (e.key === 'Backspace') { e.preventDefault(); _quickBs(); return; }
+        if (e.key === 'Enter') { e.preventDefault(); _quickTypeChar('\n'); return; }
+        if (e.key === ' ') { e.preventDefault(); _quickSkipOrType(); return; }
+      });
+      qi.addEventListener('input', e => {
+        if (!_quickActive || _quickIsComposing || e.isComposing || _quickJustComposed) return;
+        const val = qi.value;
+        if (!val) return;
+        qi.value = '';
+        if (_quickCursorIdx < _quickChars.length && isJamoOnly(val) && hasKoreanSyllable(_quickChars[_quickCursorIdx].char)) {
+          _applyQState(_quickCursorIdx, 'composing');
+          _quickChars[_quickCursorIdx].el.textContent = val;
+          return;
+        }
+        for (const ch of val) _quickTypeChar(ch);
+      });
+    })();
+
     // ─── Loop mode ────────────────────────────────────────────────────────────────
     let loopMode = false;
     let loopSelectMode = false;
@@ -2686,6 +3355,8 @@
     }
 
     function cancelLoopSelect() {
+      _quickSelectMode = false;
+      _removeQuickLimitMarker();
       loopSelectMode = false;
       loopSelectStep = 0;
       _loopStartIdx = -1;
@@ -2717,6 +3388,7 @@
         _loopStartIdx = idx;
         loopSelectStep = 2;
         placeLoopMarker('start', idx);
+        if (_quickSelectMode) _placeQuickLimitMarker(idx);
         updateLoopSelectUI();
       } else if (loopSelectStep === 2) {
         if (idx <= _loopStartIdx) {
@@ -2724,6 +3396,7 @@
           _loopStartIdx = idx;
           document.querySelectorAll('.loop-marker-start').forEach(el => el.remove());
           placeLoopMarker('start', idx);
+          if (_quickSelectMode) _placeQuickLimitMarker(idx);
           updateLoopRangeHighlight();
           return;
         }
@@ -2732,10 +3405,14 @@
         placeLoopMarker('end', idx);
         updateLoopRangeHighlight();
         updateLoopSelectUI();
-        // 반복 횟수 패널 표시
-        document.getElementById('loop-count-slider').value = 5;
-        updateLoopSlider(5);
-        document.getElementById('loop-count-panel').style.display = '';
+        if (_quickSelectMode) {
+          _openQuickPracticeFromSelection();
+        } else {
+          // 반복 횟수 패널 표시
+          document.getElementById('loop-count-slider').value = 5;
+          updateLoopSlider(5);
+          document.getElementById('loop-count-panel').style.display = '';
+        }
       }
     });
 
