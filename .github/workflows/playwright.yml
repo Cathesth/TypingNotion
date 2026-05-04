@@ -21,8 +21,12 @@ concurrency:
   group: typingnotion-qa-${{ github.event.inputs.target }}
   cancel-in-progress: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
