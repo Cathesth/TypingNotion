@@ -67,6 +67,7 @@ module.exports = async function handler(req, res) {
     json(res, 200, {
       ok: true,
       target,
+      requestedAt: Date.now(),
       actionsUrl: `https://github.com/${REPO}/actions/workflows/${WORKFLOW}`,
       reportUrl: process.env.QA_REPORT_URL || `https://${owner}.github.io/${repo}/`
     });

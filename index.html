@@ -1467,6 +1467,14 @@
       <p id="qa-status" class="font-mono text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed min-h-[38px] mt-2 mb-4">
         GitHub 로그인 후 production/beta Playwright QA를 실행합니다.
       </p>
+      <div id="qa-result" style="display:none" class="mb-3 rounded-md border border-zinc-200 dark:border-zinc-800
+                  bg-zinc-50 dark:bg-zinc-900 px-3 py-2 font-mono text-xs">
+        <div class="flex items-center justify-between gap-3">
+          <span id="qa-result-state" class="text-zinc-500 dark:text-zinc-400">queued</span>
+          <span id="qa-result-target" class="text-zinc-300 dark:text-zinc-600"></span>
+        </div>
+        <div id="qa-result-detail" class="mt-1.5 text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500"></div>
+      </div>
       <div id="qa-actions" class="grid grid-cols-3 gap-2 mb-3" style="display:none">
         <button onclick="runQa('prod')" class="qa-run-btn px-3 py-2 font-mono text-xs font-medium rounded-md
                bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800
@@ -1763,6 +1771,8 @@
 
     // ─── QA launcher (beta/admin only) ────────────────────────────────────────────
     let _qaUser = null;
+    let _qaPollTimer = null;
+    let _qaRun = null;
 
     function _isQaEntryAllowed() {
       const host = location.hostname;
@@ -1790,6 +1800,69 @@
       }[tone] || 'text-zinc-500 dark:text-zinc-400');
     }
 
+    function _stopQaPolling() {
+      if (_qaPollTimer) clearTimeout(_qaPollTimer);
+      _qaPollTimer = null;
+    }
+
+    function _setQaResult(data = null, target = '') {
+      const box = document.getElementById('qa-result');
+      if (!data) {
+        box.style.display = 'none';
+        return;
+      }
+      const state = document.getElementById('qa-result-state');
+      const targetEl = document.getElementById('qa-result-target');
+      const detail = document.getElementById('qa-result-detail');
+      const done = data.status === 'completed';
+      const success = done && data.conclusion === 'success';
+      const failed = done && data.conclusion && data.conclusion !== 'success';
+      state.textContent = done ? data.conclusion : data.status;
+      state.className = success
+        ? 'text-green-600 dark:text-green-400'
+        : failed
+          ? 'text-red-500 dark:text-red-400'
+          : 'text-indigo-500 dark:text-indigo-400';
+      targetEl.textContent = target ? target.toUpperCase() : '';
+      const failures = data.failures || [];
+      if (!data.found) detail.textContent = data.message || 'GitHub Actions 실행 생성 대기 중입니다.';
+      else if (failures.length) {
+        const first = failures[0];
+        const step = first.steps?.[0];
+        detail.textContent = step ? `${first.name} / ${step.name}: ${step.conclusion}` : `${first.name}: ${first.conclusion}`;
+      } else if (done) detail.textContent = success ? '모든 QA 테스트가 통과했습니다.' : 'QA 실행이 완료되었습니다.';
+      else detail.textContent = 'GitHub Actions에서 테스트를 실행하는 중입니다.';
+      box.style.display = '';
+    }
+
+    async function _pollQaStatus() {
+      if (!_qaRun) return;
+      try {
+        const params = new URLSearchParams();
+        if (_qaRun.runId) params.set('runId', _qaRun.runId);
+        if (_qaRun.requestedAt) params.set('since', _qaRun.requestedAt);
+        const res = await fetch(`/api/qa/status?${params}`, { credentials: 'same-origin' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'QA 상태 확인에 실패했습니다.');
+
+        if (data.id) _qaRun.runId = data.id;
+        if (data.htmlUrl) document.getElementById('qa-actions-link').href = data.htmlUrl;
+        if (data.reportUrl) document.getElementById('qa-report-link').href = data.reportUrl;
+        document.getElementById('qa-links').style.display = 'grid';
+        document.getElementById('qa-report-link').style.display = '';
+        _setQaResult(data, _qaRun.target);
+
+        if (data.status === 'completed') {
+          _setQaStatus(data.conclusion === 'success' ? 'QA가 통과했습니다.' : 'QA가 실패했습니다. 아래 요약과 상세 리포트를 확인하세요.', data.conclusion === 'success' ? 'ok' : 'err');
+          _stopQaPolling();
+          return;
+        }
+      } catch (error) {
+        _setQaStatus(error.message || 'QA 상태 확인에 실패했습니다.', 'err');
+      }
+      _qaPollTimer = setTimeout(_pollQaStatus, 5000);
+    }
+
     async function _refreshQaSession() {
       const res = await fetch('/api/qa/me', { credentials: 'same-origin' });
       if (!res.ok) throw new Error('QA 인증 상태를 확인할 수 없습니다.');
@@ -1804,6 +1877,7 @@
     async function openQaPanel() {
       document.getElementById('qa-modal').style.display = 'flex';
       document.getElementById('qa-links').style.display = 'none';
+      if (!_qaRun) _setQaResult(null);
       const params = new URLSearchParams(location.search);
       if (params.get('qa_error')) {
         _setQaStatus(`QA 인증 실패: ${params.get('qa_error')}`, 'err');
@@ -1832,8 +1906,11 @@
     }
 
     async function runQa(target) {
+      _stopQaPolling();
+      _qaRun = null;
       document.querySelectorAll('.qa-run-btn').forEach(btn => { btn.disabled = true; btn.classList.add('opacity-50'); });
       document.getElementById('qa-links').style.display = 'none';
+      _setQaResult({ found: false, status: 'queued', message: 'QA 실행 요청을 준비 중입니다.' }, target);
       _setQaStatus(`${target.toUpperCase()} QA 실행 요청 중...`, 'loading');
       try {
         const res = await fetch('/api/qa/run', {
@@ -1847,15 +1924,18 @@
           if (data.actionsUrl) {
             document.getElementById('qa-actions-link').href = data.actionsUrl;
             document.getElementById('qa-report-link').style.display = 'none';
-            document.getElementById('qa-links').style.display = 'flex';
+            document.getElementById('qa-links').style.display = 'grid';
           }
           throw new Error(data.error || 'QA 실행 요청에 실패했습니다.');
         }
+        _qaRun = { target, requestedAt: data.requestedAt, runId: data.runId || null };
         document.getElementById('qa-actions-link').href = data.actionsUrl;
         document.getElementById('qa-report-link').href = data.reportUrl;
         document.getElementById('qa-report-link').style.display = '';
-        document.getElementById('qa-links').style.display = 'flex';
-        _setQaStatus('QA 실행을 시작했습니다. Actions에서 진행 상태를 보고, 완료 후 리포트를 확인하세요.', 'ok');
+        document.getElementById('qa-links').style.display = 'grid';
+        _setQaStatus('QA 실행을 시작했습니다. 상태를 확인하는 중입니다.', 'loading');
+        _setQaResult({ found: false, status: 'queued', message: 'GitHub Actions 실행 생성 대기 중입니다.' }, target);
+        _qaPollTimer = setTimeout(_pollQaStatus, 2000);
       } catch (error) {
         _setQaStatus(error.message || 'QA 실행 요청에 실패했습니다.', 'err');
       } finally {
