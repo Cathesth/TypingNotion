@@ -1,0 +1,82 @@
+name: TypingNotion QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deployment target to test'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - prod
+          - beta
+          - both
+      actor:
+        description: 'GitHub user who requested this QA run'
+        required: false
+        default: 'unknown'
+
+concurrency:
+  group: typingnotion-qa-${{ github.event.inputs.target }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    name: Playwright (${{ github.event.inputs.target }})
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          TARGET: ${{ github.event.inputs.target }}
+          PROD_URL: ${{ vars.PROD_URL || 'https://typingnotion.vercel.app' }}
+          BETA_URL: ${{ vars.BETA_URL || 'https://typingnotion-git-beta-cronos-projects-6b573ea0.vercel.app' }}
+
+      - name: Upload Playwright report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 14
+
+      - name: Configure GitHub Pages
+        if: always()
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playwright-report
+
+      - name: Deploy report to GitHub Pages
+        if: always()
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Add report links
+        if: always()
+        run: |
+          echo "### TypingNotion QA" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Requested by: ${{ github.event.inputs.actor }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Target: ${{ github.event.inputs.target }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- HTML report: ${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
