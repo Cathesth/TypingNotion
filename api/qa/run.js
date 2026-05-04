@@ -3,8 +3,14 @@ const { REPO, WORKFLOW, getSession, githubFetch, json } = require('../_qa');
 const ALLOWED_TARGETS = new Set(['prod', 'beta', 'both']);
 
 async function getRecentRuns(owner, repo) {
-  const response = await githubFetch(`/repos/${owner}/${repo}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`);
-  return response.json();
+  try {
+    const response = await githubFetch(`/repos/${owner}/${repo}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`);
+    return response.json();
+  } catch (error) {
+    // Some token/workflow visibility combinations return 404 for run listing
+    // even when workflow_dispatch can still work. Do not block QA on this check.
+    return null;
+  }
 }
 
 module.exports = async function handler(req, res) {
@@ -35,13 +41,15 @@ module.exports = async function handler(req, res) {
 
     const [owner, repo] = REPO.split('/');
     const recent = await getRecentRuns(owner, repo);
-    const activeRun = (recent.workflow_runs || []).find(run => run.status === 'queued' || run.status === 'in_progress');
-    if (activeRun) {
-      json(res, 409, {
-        error: '이미 QA가 실행 중입니다. 현재 실행이 끝난 뒤 다시 시도하세요.',
-        actionsUrl: activeRun.html_url
-      });
-      return;
+    if (recent) {
+      const activeRun = (recent.workflow_runs || []).find(run => run.status === 'queued' || run.status === 'in_progress');
+      if (activeRun) {
+        json(res, 409, {
+          error: '이미 QA가 실행 중입니다. 현재 실행이 끝난 뒤 다시 시도하세요.',
+          actionsUrl: activeRun.html_url
+        });
+        return;
+      }
     }
 
     await githubFetch(`/repos/${owner}/${repo}/actions/workflows/${WORKFLOW}/dispatches`, {
