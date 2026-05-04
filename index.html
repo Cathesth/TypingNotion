@@ -1445,38 +1445,51 @@
      QA MODAL
 ══════════════════════════════════════════════ -->
   <div id="qa-modal" style="display:none" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-    <div onclick="closeQaPanel()" class="absolute inset-0 bg-black/20 dark:bg-black/40"></div>
-    <div class="modal-box relative bg-white dark:bg-zinc-900 rounded-2xl shadow-xl
-                border border-zinc-100 dark:border-zinc-800 p-5 w-full max-w-sm">
-      <div class="flex items-start justify-between gap-3 mb-4">
+    <div onclick="closeQaPanel()" class="absolute inset-0 bg-white/70 dark:bg-black/50 backdrop-blur-sm"></div>
+    <div class="modal-box relative bg-white dark:bg-zinc-950 rounded-xl shadow-lg
+                border border-zinc-200 dark:border-zinc-800 p-4 w-full max-w-[340px]">
+      <div class="flex items-start justify-between gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
         <div>
-          <p class="font-mono text-sm font-semibold text-zinc-800 dark:text-zinc-100 mb-1">QA 실행</p>
-          <p id="qa-user" class="font-mono text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed"></p>
+          <p class="font-mono text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Playwright</p>
+          <p class="font-mono text-sm font-semibold text-zinc-800 dark:text-zinc-100">QA 실행</p>
         </div>
-        <button onclick="closeQaPanel()" class="font-mono text-xs text-zinc-300 dark:text-zinc-600
-               hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">닫기</button>
+        <button onclick="closeQaPanel()" class="w-7 h-7 flex items-center justify-center rounded
+               text-zinc-300 dark:text-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-200
+               hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors" data-tip="닫기">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6L6 18" />
+            <path d="M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <p id="qa-status" class="font-mono text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed min-h-[36px] mb-4">
+      <p id="qa-user" class="font-mono text-[11px] text-zinc-400 dark:text-zinc-500 leading-relaxed mt-3"></p>
+      <p id="qa-status" class="font-mono text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed min-h-[38px] mt-2 mb-4">
         GitHub 로그인 후 production/beta Playwright QA를 실행합니다.
       </p>
       <div id="qa-actions" class="grid grid-cols-3 gap-2 mb-3" style="display:none">
-        <button onclick="runQa('prod')" class="qa-run-btn px-3 py-2 font-mono text-xs font-medium rounded-lg
-               bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200
-               hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">Prod</button>
-        <button onclick="runQa('beta')" class="qa-run-btn px-3 py-2 font-mono text-xs font-medium rounded-lg
-               bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200
-               hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">Beta</button>
-        <button onclick="runQa('both')" class="qa-run-btn px-3 py-2 font-mono text-xs font-medium rounded-lg
-               bg-indigo-500 text-white hover:bg-indigo-400 transition-colors">Both</button>
+        <button onclick="runQa('prod')" class="qa-run-btn px-3 py-2 font-mono text-xs font-medium rounded-md
+               bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800
+               hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Prod</button>
+        <button onclick="runQa('beta')" class="qa-run-btn px-3 py-2 font-mono text-xs font-medium rounded-md
+               bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800
+               hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Beta</button>
+        <button onclick="runQa('both')" class="qa-run-btn px-3 py-2 font-mono text-xs font-medium rounded-md
+               bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900
+               hover:bg-zinc-700 dark:hover:bg-zinc-300 transition-colors">Both</button>
       </div>
-      <button id="qa-login-btn" onclick="loginQa()" class="w-full px-3 py-2 font-mono text-xs font-medium rounded-lg
+      <button id="qa-login-btn" onclick="loginQa()" class="w-full px-3 py-2 font-mono text-xs font-medium rounded-md
              bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900
              hover:bg-zinc-600 dark:hover:bg-zinc-300 transition-colors">GitHub 로그인</button>
-      <div id="qa-links" class="mt-3 flex gap-3 font-mono text-xs" style="display:none">
-        <a id="qa-actions-link" href="#"
-          class="text-indigo-500 hover:text-indigo-400 underline underline-offset-2">Actions 보기</a>
-        <a id="qa-report-link" href="#"
-          class="text-indigo-500 hover:text-indigo-400 underline underline-offset-2">리포트 보기</a>
+      <div id="qa-links" class="mt-3 grid grid-cols-2 gap-2 font-mono text-xs" style="display:none">
+        <a id="qa-actions-link" href="#" target="_blank" rel="noopener"
+          class="px-3 py-2 rounded-md border border-zinc-200 dark:border-zinc-800
+                 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100
+                 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors text-center">Actions</a>
+        <a id="qa-report-link" href="#" target="_blank" rel="noopener"
+          class="px-3 py-2 rounded-md border border-zinc-200 dark:border-zinc-800
+                 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100
+                 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors text-center">Report</a>
       </div>
     </div>
   </div>
@@ -1769,7 +1782,7 @@
     function _setQaStatus(text, tone = 'neutral') {
       const el = document.getElementById('qa-status');
       el.textContent = text;
-      el.className = 'font-mono text-xs leading-relaxed min-h-[36px] mb-4 ' + ({
+      el.className = 'font-mono text-xs leading-relaxed min-h-[38px] mt-2 mb-4 ' + ({
         neutral: 'text-zinc-500 dark:text-zinc-400',
         ok: 'text-green-600 dark:text-green-400',
         err: 'text-red-500 dark:text-red-400',

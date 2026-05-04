@@ -27,7 +27,9 @@ test('직접 입력으로 타이핑을 완료할 수 있다', async ({ page }) =
   await expect(page.locator('#r-errs')).toContainText('0');
 });
 
-test('자동 타이핑 옵션이 공백과 기호를 통과시킨다', async ({ page }) => {
+test('자동 타이핑 옵션이 공백과 기호를 통과시킨다', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.metadata.target !== 'beta', '자동 타이핑은 beta 기능입니다.');
+
   await page.addInitScript(() => {
     localStorage.setItem('typing-settings', JSON.stringify({
       skipSymbols: true,
@@ -51,7 +53,9 @@ test('자동 타이핑 옵션이 공백과 기호를 통과시킨다', async ({ 
   await expect(page.locator('#r-errs')).toContainText('0');
 });
 
-test('캐시된 노션 메모를 네트워크 없이 불러올 수 있다', async ({ page }) => {
+test('캐시된 노션 메모를 네트워크 없이 불러올 수 있다', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.metadata.target !== 'beta', 'URL 캐시는 beta 기능입니다.');
+
   const url = 'https://example.notion.site/Test-Page';
   await page.addInitScript(([cacheUrl]) => {
     localStorage.setItem('typing-cache-enabled', 'true');
