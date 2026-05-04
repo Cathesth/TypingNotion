@@ -1,19 +1,20 @@
 const { test, expect } = require('@playwright/test');
 
-async function openApp(page) {
-  await page.goto('./index.html');
+async function openApp(page, testInfo) {
+  const target = testInfo.project.metadata.target;
+  await page.goto(target === 'local' ? './index.html' : '/');
   await expect(page.locator('h1')).toContainText('TypingNotion');
 }
 
-test('앱이 열리고 핵심 입력 UI가 보인다', async ({ page }) => {
-  await openApp(page);
+test('앱이 열리고 핵심 입력 UI가 보인다', async ({ page }, testInfo) => {
+  await openApp(page, testInfo);
   await expect(page.locator('#tab-url')).toBeVisible();
   await expect(page.locator('#tab-text')).toBeVisible();
   await expect(page.locator('#version-badge')).toContainText(/^v\d+\./);
 });
 
-test('직접 입력으로 타이핑을 완료할 수 있다', async ({ page }) => {
-  await openApp(page);
+test('직접 입력으로 타이핑을 완료할 수 있다', async ({ page }, testInfo) => {
+  await openApp(page, testInfo);
 
   await page.click('#tab-text');
   await page.fill('#source-ta', 'abc');
@@ -42,7 +43,7 @@ test('자동 타이핑 옵션이 공백과 기호를 통과시킨다', async ({ 
       onlyKorean: false
     }));
   });
-  await openApp(page);
+  await openApp(page, testInfo);
 
   await page.click('#tab-text');
   await page.fill('#source-ta', 'a b!');
@@ -66,7 +67,7 @@ test('캐시된 노션 메모를 네트워크 없이 불러올 수 있다', asyn
       savedAt: Date.now()
     }));
   }, [url]);
-  await openApp(page);
+  await openApp(page, testInfo);
 
   await page.fill('#url-inp', url);
   await page.click('#fetch-btn');
@@ -79,7 +80,7 @@ test('캐시된 노션 메모를 네트워크 없이 불러올 수 있다', asyn
 });
 
 test('production/beta 이동 링크가 존재한다', async ({ page }, testInfo) => {
-  await openApp(page);
+  await openApp(page, testInfo);
   const target = testInfo.project.metadata.target;
   const expectedHref = target === 'beta' ? /typingnotion\.vercel\.app/ : /git-beta|github|vercel/;
   await expect(page.locator('a[href*="vercel.app"]').first()).toHaveAttribute('href', expectedHref);
